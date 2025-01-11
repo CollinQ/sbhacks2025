@@ -47,59 +47,41 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
       return
     }
 
-    // INSTEAD, MAKE A REQUEST TO THE BACKEND TO PROCESS THE VIDEO
+    try {
+      setUploading(true)
+      setProgress(0)
 
-    // Upload to Supabase, need to compress the file first
-    // try {
-    //   setUploading(true)
-    //   setProgress(0)
+      // Make API request to process video
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/process_video`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          video_url: file.name, // You might want to pass more info about the video
+        }),
+      });
 
-    //   // Create a unique file name
-    //   const fileExt = file.name.split('.').pop()
-    //   const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`
-    //   const filePath = `${fileName}`
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-    //   console.log('Attempting to upload file:', {
-    //     bucket: 'item-videos',
-    //     filePath,
-    //     fileType: file.type,
-    //     fileSize: file.size
-    //   })
+      const data = await response.json();
+      console.log('Video processing response:', data);
 
-    //   // Upload directly to the bucket
-    //   const { data, error: uploadError } = await supabase.storage
-    //     .from('item-videos')
-    //     .upload(filePath, file, {
-    //       cacheControl: '3600',
-    //       upsert: true // Changed to true to allow overwrites
-    //     })
+      if (onUploadComplete) {
+        onUploadComplete(data.url || '');
+      }
 
-    //   if (uploadError) {
-    //     console.error('Upload error details:', uploadError)
-    //     throw uploadError
-    //   }
+      // Navigate after successful processing
+      router.push('/confirm-items');
 
-    //   console.log('Upload successful, data:', data)
-
-    //   // Get the public URL
-    //   const { data: { publicUrl } } = supabase.storage
-    //     .from('item-videos')
-    //     .getPublicUrl(filePath)
-
-    //   console.log('Public URL generated:', publicUrl)
-
-    //   if (onUploadComplete) {
-    //     onUploadComplete(publicUrl)
-    //   }
-
-    // } catch (error) {
-    //   console.error('Error uploading video:', error)
-    //   setError('Failed to upload video. Please try again.')
-    // } finally {
-    //   setUploading(false)
-    // }
-
-    router.push('/confirm-items')
+    } catch (error) {
+      console.error('Error processing video:', error);
+      setError('Failed to process video. Please try again.');
+    } finally {
+      setUploading(false);
+    }
   }
 
   const clearFile = () => {
