@@ -1,7 +1,8 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from dotenv import load_dotenv
 from supabase import create_client, Client
+from scripts import gemini_video_processing as gemini
 import os
 
 # Load environment variables
@@ -14,6 +15,30 @@ supabase: Client = create_client(url, key)
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
+
+@app.route('/api/process_video', methods=['POST'])
+def process_video():
+    try:
+        data = request.get_json()
+        video_url = data.get('video_url')
+        
+        if not video_url:
+            return jsonify({"error": "No video URL provided"}), 400
+            
+        # Process the video using Gemini
+        result = gemini.main()
+        
+        return jsonify({
+            "status": "success",
+            "message": "Video processing completed",
+            "data": result
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 @app.route('/api/init', methods=['GET'])
 def init():

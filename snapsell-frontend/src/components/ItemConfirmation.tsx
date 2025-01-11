@@ -5,30 +5,20 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft, ChevronRight, DollarSign } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-
-interface Item {
-  id: number
-  image: string
-  title: string
-  description: string
-  price: number
-  condition: string
-  status: string
-  confidence: number
-}
+import { Item } from '../types/item'
 
 interface ItemConfirmationProps {
   items: Item[]
+  onConfirm: (items: Item[]) => void
   editMode?: boolean
 }
 
-export function ItemConfirmation({ items, editMode = false }: ItemConfirmationProps) {
+export function ItemConfirmation({ items, onConfirm, editMode = false }: ItemConfirmationProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [editedItems, setEditedItems] = useState<Item[]>(items.map(item => ({
     ...item,
     condition: item.condition || 'good',
     status: item.status || 'available',
-    title: item.title || ''
   })))
   const router = useRouter()
 
@@ -61,6 +51,7 @@ export function ItemConfirmation({ items, editMode = false }: ItemConfirmationPr
       } else {
         // TODO: Create new items in Supabase
         console.log('Creating items:', editedItems)
+        onConfirm(editedItems)
         router.push('/inventory')
       }
     } catch (error) {
