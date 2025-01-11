@@ -1,0 +1,106 @@
+<marketplace_listing_analysis>
+
+Overview of the Video Content:
+The video tour highlights an assortment of furniture pieces, displaying their shapes, sizes, and any notable features (e.g., recliner mechanisms, extendable table leaves). The seller zooms in on joints, corners, or wear points to show authenticity and current condition.
+
+Anticipated Challenges:
+
+- Dimension Accuracy: Potential buyers need precise measurements to ensure items fit in their space.
+- Structural Integrity: Assessing stability of chairs, tables, or shelving might be difficult from video alone.
+- Surface Condition: Scratches, watermarks, or chipped paint may be hard to see if lighting is poor.
+- Style Classification: Determining if an item is “mid-century modern,” “traditional,” or “farmhouse” style can be subjective.
+
+Listing Strategy:
+
+- Detailed Measurements: Provide length, width, height, seat height for chairs, depth for sofas, etc.
+- Style & Material Emphasis: Call out solid wood, metal frames, upholstery type, or veneer finishes.
+- Condition Transparency: Show all angles—especially legs, corners, underside—for a thorough depiction.
+- Pricing for Local Pickup: Furniture often involves shipping or local pickup; prices may vary by region.
+
+Key Video Sections to Note:
+- Close-ups of joinery, upholstery seams, or surface finishing
+- Demonstrations of moving parts (e.g., recliners, table extensions)
+- Any brand markings or tags
+- Visual checks for damage (scratches, missing hardware)
+
+Common Furniture Categories:
+- Living Room (sofas, loveseats, coffee tables)
+- Dining Room (tables, chairs, sideboards)
+- Bedroom (bed frames, dressers, nightstands)
+- Office (desks, bookcases, office chairs)
+- Outdoor & Patio
+
+Price Estimation Approach:
+- Compare local classified listings for similar furniture types.
+- Factor in brand reputation (e.g., IKEA, West Elm, Ethan Allen).
+- Adjust for style trends and condition (vintage mid-century might be in high demand).
+
+Marketplace Optimization Strategy:
+
+Title Formation:
+- Mention type and primary material (e.g., “Wooden Dining Table”)
+- Include brand if known (e.g., “IKEA KIVIK Sofa”)
+- Insert size or occupancy (e.g., “seats 6,” “fits Queen mattress”)
+- Stay within 150 characters
+
+Description Structure:
+- Leading style descriptor (modern, rustic, vintage, etc.)
+- Materials used (solid oak, tempered glass, faux leather)
+- Condition details (minor nicks, moderate wear)
+- Dimensions (L x W x H, seat height, etc.)
+- Assembly/disassembly instructions (if relevant)
+
+Condition Assessment Guidelines:
+New:
+- Never used, still with protective materials or tags
+- Assembly instructions or hardware included
+Used - Like New:
+- Minimal surface wear, no stains or odors
+- Sturdy frame, looks almost new
+Used - Good:
+- Normal wear like small scratches
+- Fully functional, no structural damage
+Used - Fair:
+- Noticeable blemishes or stains
+- May require minor repairs, still functional
+
+CSV Formatting Requirements:
+- No commas within fields. MAKE SURE TO NOT USE COMMAS THIS IS VERY IMPORTANT OTHERWISE THE CSV WILL NOT BE FORMATTED PAY CLOSE ATTENTION TO THIS.
+- Furniture style references spelled out
+- Brand, if unknown, marked as NA
+- Integer prices only
+- Keep required columns in order
+
+Have I processed all items in the video? No. Will continue with remaining items. Status: ITEMS_PENDING
+
+</marketplace_listing_analysis>
+
+<estimated_item_count>TOTAL_ITEMS_TO_LIST: 8</estimated_item_count>
+
+<column_heading_order>title,price,condition,description,category>
+
+<csv>
+title,price,condition,description,category
+Mid-Century Modern Walnut Coffee Table,200,Used - Good,Solid walnut coffee table with tapered legs. Minor scuffs on edges. 48L x 24W x 18H inches.,Home & Garden//Furniture//Living Room
+IKEA Kallax 4-Shelf Unit,50,Used - Fair,White particleboard shelving unit. Some scratches on corners. Fully functional for storage.,Home & Garden//Furniture//Storage
+Pottery Barn King Bed Frame,400,Used - Like New,Wooden king bed frame in dark espresso finish. Minimal wear. Includes all hardware.,Home & Garden//Furniture//Bedroom
+Antique Oak Writing Desk,250,Used - Fair,Vintage desk with beautiful oak veneer. Some peeling on corners. Slight wobble in one leg.,Home & Garden//Furniture//Office
+Ashley Recliner Sofa,650,Used - Good,3-seater reclining sofa in beige fabric. No stains, small tear on left armrest. Recline mechanism works smoothly.,Home & Garden//Furniture//Living Room
+</csv>
+
+<last_processed_timestamp>Last item processed at: 03:30</last_processed_timestamp>
+
+<listing_status>Status: ITEMS_PENDING</listing_status>
+
+<marketplace_notes>
+Key observations:
+- Items appear to be in decent shape, with minimal major damage.
+- Pricing generally aligns with local market for mid-range furniture.
+- Including close-up shots of wear areas boosts seller transparency.
+
+Next steps:
+- Finalize remaining furniture items not yet logged.
+- Verify dimensions for accuracy and consistency.
+- Cross-check brand or model (if any) for better listing credibility.
+- Consider highlighting “local pickup only” or shipping options in descriptions.
+</marketplace_notes>
