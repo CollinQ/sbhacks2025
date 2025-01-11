@@ -2,7 +2,7 @@
 
 ## 1. Create a Virtual Environment
 python3 -m venv venv
-source venv/bin/activate  # For Windows: .\venv\Scripts\activate
+source venv/bin/activate  
 
 # 2. Install the dependencies
 pip install -r requirements.txt
