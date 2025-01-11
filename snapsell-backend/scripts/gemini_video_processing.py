@@ -7,12 +7,7 @@ import csv
 from dotenv import load_dotenv
 import google.generativeai as genai
 from google.generativeai import caching
-import cv2
-import random
-import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
-from PIL import Image, ImageDraw, ImageFont
 import time
 from supabase import create_client, Client
 import uuid
