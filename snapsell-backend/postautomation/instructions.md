@@ -13,7 +13,7 @@ echo "CHROMEDRIVER_PATH=/path/to/chromedriver" > .env
 # Replace /path/to/chromedriver with the actual path to your ChromeDriver executable.
 
 ## 4. Run the Script
-python your_script_name.py
+python automate.py
 
 ## 5. Deactivate Virtual Environment (Optional)
 deactivate
