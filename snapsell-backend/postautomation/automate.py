@@ -40,6 +40,7 @@ class FacebookSessionManager:
         """Initialize Chrome driver with optimized settings for Facebook Marketplace."""
         # Set up Chrome options
         chrome_options = Options()
+        chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=1920,1080")
         chrome_options.add_argument("--no-sandbox")
@@ -203,7 +204,7 @@ class FacebookSessionManager:
             self._click_next_button()
             self._click_publish_button()
 
-            time.sleep(5)
+            time.sleep(8)
             
             return True
             
@@ -281,14 +282,13 @@ class FacebookSessionManager:
                 By.XPATH, '//span[contains(text(), "Next")]/ancestor::div[@role="button"]'
             )))
             next_button.click()
-            time.sleep(2)
+            time.sleep(1)
         except Exception as e:
             print(f"Error clicking Next button: {e}")
             
     def _click_publish_button(self):
         """Helper method to click the Next button."""
         try:
-            time.sleep(2)
             publish_button = self.wait.until(EC.presence_of_element_located((
                 By.XPATH, '//span[contains(text(), "Publish")]/ancestor::div[@role="button"]'
             )))

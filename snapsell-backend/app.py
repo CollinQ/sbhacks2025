@@ -30,61 +30,92 @@ CORS(app, supports_credentials=True, resources={
 def post_to_facebook():
     try:
         data = request.get_json()
-        item = data.get('item')  # Now expecting a single item
-        print(f"[INFO] Received item: {item}")
+        items = data.get('items', [])
+        print(f"[INFO] Received {len(items)} items")
 
-        # Initialize Facebook session manager
+        results = []
         session_manager = FacebookSessionManager()
         session_manager.init_driver()
 
         try:
-            # Attempt to load existing session or perform new login
+            # Facebook login code remains the same...
             if not session_manager.load_session():
                 email = os.getenv("FB_EMAIL")
                 password = os.getenv("FB_PASSWORD")
                 if not session_manager.login(email, password):
                     raise Exception("Facebook login failed")
 
-            # Download image from URL to temp file
-           
-            temp_dir = tempfile.gettempdir()
-            image_url = item['image_url']
-            image_ext = os.path.splitext(image_url.split('?')[0])[1] or '.jpg'
-            temp_image_path = os.path.join(temp_dir, f"temp_image{image_ext}")
+            # Process each item
+            successful_item_ids = []  # Track successfully posted items
+            for item in items:
+                try:
+                    # Image processing and Facebook posting code remains the same...
+                    temp_dir = tempfile.gettempdir()
+                    image_url = item['image_url']
+                    image_ext = os.path.splitext(image_url.split('?')[0])[1] or '.jpg'
+                    temp_image_path = os.path.join(temp_dir, f"temp_image_{item['id']}{image_ext}")
 
-            response = requests.get(image_url)
-            with open(temp_image_path, 'wb') as f:
-                f.write(response.content)
+                    response = requests.get(image_url)
+                    with open(temp_image_path, 'wb') as f:
+                        f.write(response.content)
 
-            # Create listing for the item using local image path
-            success = session_manager.create_marketplace_listing(
-                title=item['title'],
-                price=int(item['price']),
-                image_path=temp_image_path,
-                category="Miscellaneous",
-                condition=item['condition'],
-                description=item['description']
-            )
+                    success = session_manager.create_marketplace_listing(
+                        title=item['title'],
+                        price=int(item['price']),
+                        image_path=temp_image_path,
+                        category="Miscellaneous",
+                        condition=item['condition'],
+                        description=item['description']
+                    )
 
-            # Clean up temp file
-            os.remove(temp_image_path)
+                    os.remove(temp_image_path)
 
-            if not success:
-                raise Exception("Failed to create Facebook listing")
+                    if success:
+                        successful_item_ids.append(item['id'])
 
-            # Update item status in database if needed
-            # TODO: Add database update logic here
+                    results.append({
+                        "item_id": item['id'],
+                        "title": item['title'],
+                        "success": success,
+                        "message": "Posted successfully" if success else "Failed to create listing"
+                    })
+
+                except Exception as item_error:
+                    results.append({
+                        "item_id": item['id'],
+                        "title": item['title'],
+                        "success": False,
+                        "message": str(item_error)
+                    })
+                print(f"[INFO] Completed posting item: '{item['title']}' (ID: {item['id']})")
+
+            # Update status for all successful items in one batch
+            if successful_item_ids:
+                try:
+                    # Update all successful items to 'listed' status
+                    supabase.table('items')\
+                            .update({'status': 'listed'})\
+                            .in_('id', successful_item_ids)\
+                            .execute()
+                    print(f"[INFO] Updated status to 'listed' for items: {successful_item_ids}")
+                except Exception as db_error:
+                    print(f"[ERROR] Failed to update item statuses: {str(db_error)}")
+            
 
             return jsonify({
-                "status": "success", 
-                "message": f"Item '{item['title']}' posted to Facebook"
+                "status": "success",
+                "results": results,
+                "message": f"Processed {len(items)} items"
             }), 200
 
         finally:
             session_manager.quit()
 
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({
+            "status": "error", 
+            "message": str(e)
+        }), 500
 
 @app.route('/api/process_video', methods=['POST'])
 def process_video():
