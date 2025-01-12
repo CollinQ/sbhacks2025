@@ -149,17 +149,13 @@ class FacebookSessionManager:
             marketplace_chats.click()
 
             # Find unvisited chats
-            unvisited_chats = self.wait.until(EC.presence_of_all_elements_located((
-                By.CSS_SELECTOR, 'span.xeuugli.xveuv9e'
-            )))
-
-            # print("visited chats")
-
-            # visited_chats = self.wait.until(EC.presence_of_all_elements_located((
-            #     By.CSS_SELECTOR, 'a[aria-current="false"] span.xeuugli.x1j3b5cy.x1nvkwcz'
-            # )))
-
-            # print(f"visited chats: {visited_chats}")
+            try:
+                unvisited_chats = self.wait.until(EC.presence_of_all_elements_located((
+                    By.CSS_SELECTOR, 'span.xeuugli.xveuv9e'
+                )))
+            except Exception as e:
+                print(f"Error finding unvisited chats: {e}, 0 unvisited chats found")
+                return
 
             print(f"Found {len(unvisited_chats)} unvisited chats")
 
@@ -232,7 +228,6 @@ class FacebookSessionManager:
             )))
             
             conversation_parts = []
-            buyer_name = None
             
             for container in message_containers:
                 try:
@@ -240,24 +235,15 @@ class FacebookSessionManager:
                     message_text = container.find_element(By.CSS_SELECTOR, "div[dir='auto']").text.strip()
                     if not message_text:
                         continue
-                        
-                    # Try to find the sender's name (usually in a span element)
-                    try:
-                        name_element = container.find_element(By.CSS_SELECTOR, "span.x1lliihq span.x1lliihq")
-                        sender_name = name_element.text.strip().split(' ·')[0]  # Remove the timestamp
-                        if not buyer_name and sender_name != "You":
-                            buyer_name = sender_name
-                    except:
-                        sender_name = "Unknown"
                     
-                    # Check if this is an outgoing message (from me)
+                    # Check if this is a seller message by looking for specific classes and "You sent" text
                     try:
-                        # Outgoing messages have a different CSS structure
-                        container.find_element(By.CSS_SELECTOR, "div.x1n2onr6.xw2csxc")
-                        conversation_parts.append(f"me: {message_text}")
+                        # Look for the "You sent" text or x15zctf7 class which indicates seller message
+                        container.find_element(By.CSS_SELECTOR, ".x15zctf7")
+                        conversation_parts.append(f"seller(me): {message_text}")
                     except:
-                        # If not found, it's an incoming message
-                        conversation_parts.append(f"buyer({buyer_name or 'them'}): {message_text}")
+                        # If the seller indicators aren't found, it's a buyer message
+                        conversation_parts.append(f"buyer(them): {message_text}")
                         
                 except Exception as e:
                     print(f"Error processing message container: {e}")
