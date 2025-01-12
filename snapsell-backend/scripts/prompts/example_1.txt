@@ -1,20 +1,20 @@
 <marketplace_listing_analysis>
 
-Overview of the Video Content: The video shows items intended for marketplace listing, including their condition, key features, and details relevant to potential buyers. The video should clearly display each item from multiple angles to capture important selling points and any wear or damage.
+Overview of the Video Content: The video shows items intended for marketplace listing, including their condition, key features, and details relevant to potential buyers. The video should clearly display each item from multiple angles to capture important selling points and any wear or damage. Pay attention to details about each item and make sure to make notes about the descripotion. Be very thorough.
 
 Anticipated Challenges:
 
 Lighting and Video Quality: Poor lighting or video quality may affect ability to assess item condition and details
-Price Estimation: Determining fair market value without direct price comparisons
-Condition Assessment: Accurately categorizing item condition within marketplace standards
+Price Estimation: Determining fair market value without direct price comparisons. Use best judgement to determine price.
+Condition Assessment: Accurately categorizing item condition within marketplace standards accordin to specific cracks, creases, scratches, stains, etc.
 Category Assignment: Properly mapping items to marketplace category hierarchy
-Title Creation: Crafting concise yet descriptive titles within 150-character limit
+Title Creation: Crafting concise yet descriptive titles within 150-character limit. Be very descriptive.
 
 Listing Strategy:
 
 Sequential Item Processing: Analyze items one at a time for complete detail capture
 Key Details Focus: Pay special attention to condition, brand, and distinctive features
-Mobile-First Descriptions: Create descriptions that are easy to read on mobile devices
+Mobile-First Descriptions: Create descriptions that are easy to read on mobile devices. Be very descriptive.
 Competitive Pricing: Research similar items on marketplace for price benchmarking
 
 Key Video Sections to Note:
@@ -55,6 +55,7 @@ Description Structure:
 - Mention any included accessories
 - Note any defects or issues
 - Stay within 5000 character limit
+- Make up a description about what the item can do or provide value for the buyer.
 
 Condition Assessment Guidelines:
 
@@ -72,15 +73,17 @@ Used - Good:
 - Light wear from normal use
 - Fully functional
 - No major defects
+- No cracks, creases, scratches, stains, etc.
 
 Used - Fair:
 - Noticeable wear and tear
 - May have minor issues
 - Still functional and usable
+- Has cracks, creases, scratches, stains, etc.
 
 CSV Formatting Requirements:
 
-- Clean formatting without commas in fields
+- Clean formatting without commas in fields. MAKE SURE TO NOT INCLUDE COMMAS IN THE DESCRIPTION USE SEMICOLONS OR ANYTHING ELSE, PAY ATTENTION TO THE EXAMPLE CSV. THIS IS VERY IMPORTANT.
 - Proper category hierarchy notation
 - Accurate condition categorization
 - Integer prices only
@@ -92,14 +95,14 @@ Have I processed all items in the video? No. Will continue with remaining items.
 
 <estimated_item_count>TOTAL_ITEMS_TO_LIST: 12</estimated_item_count>
 
-<column_heading_order>title,price,condition,description,category</column_heading_order>
+<column_heading_order>title,price,condition,description,category,timestamp</column_heading_order>
 
 <csv>
-title,price,condition,description,category
-Modern Glass Coffee Table,250,Used - Good,Rectangular glass coffee table with chrome legs. Minor scratches on base. 48L x 24W x 18H inches.,Home & Garden//Furniture//Tables
-Samsung 55-inch Smart TV,600,Used - Like New,2023 model Samsung Crystal UHD TV with voice control remote. Like new condition with original box.,Electronics//TVs & Video//TVs
-Leather Office Chair,150,Used - Fair,Black leather executive office chair. Some wear on armrests. Fully adjustable with lumbar support.,Home & Garden//Furniture//Chairs
-Black Gildan T-shirt, 20, Used - Fair, Black T-shirt that has been wore once. Some wear.,Clothing//Clothing//Clothing
+title,price,condition,description,category,timestamp
+Modern Glass Coffee Table,250,Used - Good,Rectangular glass coffee table with chrome legs. Minor scratches on base. 48L x 24W x 18H inches. Please reach out to me for more details.,Home & Garden//Furniture//Tables,00:05
+Samsung 55-inch Smart TV,600,Used - Like New,2023 model Samsung Crystal UHD TV with voice control remote. Like new condition with original box. Please reach out to me for more details.,Electronics//TVs & Video//TVs,00:10
+Leather Office Chair,150,Used - Fair,Black leather executive office chair. Some wear on armrests. Fully adjustable with lumbar support. Please reach out to me for more details.,Home & Garden//Furniture//Chairs,00:12
+Black Gildan T-shirt, 20, Used - Fair, Black T-shirt that has been wore once. Some wear but mainly still in good condition. Keeps warm and is comfortable. Please reach out to me for more details.,Clothing//Clothing//Clothing,00:20
 </csv>
 
 <last_processed_timestamp>Last item processed at: 02:45</last_processed_timestamp>

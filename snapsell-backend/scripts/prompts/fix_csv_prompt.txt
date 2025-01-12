@@ -5,7 +5,7 @@ Below is an outline of what you should do:
 <examples>
 <example>
 <input_csv>
-title,price,condition,description,category
+title,price,condition,description,category,timestamp
 "Modern Glass Coffee Table",250,Used - Good,Rectangular glass coffee table, 48L x 24W x 18H inches,Home & Garden//Furniture//Tables
 "Samsung 55-inch Smart TV",600,Used - Like New,"2023 model, original remote, voice control",Electronics//TVs & Video//TVs
 "Dell XPS 13 Laptop",900,Used - Fair,13-inch display with minor scratches,Electronics//Computers//Laptops
@@ -13,8 +13,8 @@ title,price,condition,description,category
 
 <ideal_output>
 <csv_analysis>
-1. The CSV header has 5 columns:
-   title,price,condition,description,category
+1. The CSV header has 6 columns:
+   title,price,condition,description,category,timestamp
 
 2. Checking each row:
    - Row 1: The description field contains commas but is not enclosed in quotes. Need to enclose "Rectangular glass coffee table, 48L x 24W x 18H inches" in double quotes.
@@ -45,19 +45,22 @@ title,price,condition,description,category
 
 <ideal_output>
 <csv_analysis>
-1. The CSV header has 5 columns.
+1. The CSV header has 6 columns.
 
 2. Checking each row:
-   - Row 1: location has a comma "New York, NY" so it must be enclosed in quotes. 
-   - Row 2: location has a comma "Houston, TX" so it must be enclosed in quotes. 
+   - Row 1: timestamp is missing
+   - Row 2: description is not long enough
+   - Row 1: the price is not an integer
    - Other fields appear to be properly enclosed.
 
 3. Specific fixes needed:
-   - Enclose "New York, NY" and "Houston, TX" in quotes.
+   - Make price an integer
+   - Add timestamp to Row 1
+   - Make description longer for Row 2
 </csv_analysis>
 
 <csv>
-title,price,condition,description,category
+title,price,condition,description,category,timestamp
 "Leather Jacket",80,Used - Good,Soft leather with minor scuffs,Fashion//Clothing//Jackets
 "Women's Sneakers",50,Used - Fair,"White, size 8, slight discoloration on soles",Fashion//Footwear//Women
 </csv>

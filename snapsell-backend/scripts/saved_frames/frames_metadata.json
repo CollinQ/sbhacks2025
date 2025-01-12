@@ -1,0 +1,52 @@
+[
+    {
+        "item_number": 1,
+        "title": "Herman Miller Chairs (Set of 3)",
+        "price": 200,
+        "condition": "Used - Good",
+        "description": "Three Herman Miller chairs.  Condition varies slightly per chair.  Please inquire for detailed photos and condition assessment of each chair.",
+        "category": "Home & Garden//Furniture//Chairs",
+        "timestamp": "00:00",
+        "frame_filename": "saved_frames/frame_1.jpg"
+    },
+    {
+        "item_number": 2,
+        "title": "Celsius Arctic Vibe Drink Can",
+        "price": 2,
+        "condition": "New",
+        "description": "Sealed can of Celsius Arctic Vibe energy drink.",
+        "category": "Food & Beverage//Drinks//Energy Drinks",
+        "timestamp": "00:14",
+        "frame_filename": "saved_frames/frame_2.jpg"
+    },
+    {
+        "item_number": 3,
+        "title": "Timbuk2 Backpack",
+        "price": 40,
+        "condition": "Used - Good",
+        "description": "Grey Timbuk2 backpack. Appears to be in good condition.  Please inquire for more details.",
+        "category": "Bags & Purses//Backpacks",
+        "timestamp": "00:21",
+        "frame_filename": "saved_frames/frame_3.jpg"
+    },
+    {
+        "item_number": 4,
+        "title": "Snag Hat",
+        "price": 15,
+        "condition": "New",
+        "description": "Red and white Snag-branded trucker hat. Appears to be new.",
+        "category": "\"Clothing, Shoes & Accessories//Accessories//Hats\"",
+        "timestamp": "00:27",
+        "frame_filename": "saved_frames/frame_4.jpg"
+    },
+    {
+        "item_number": 5,
+        "title": "MacBook Pro M4 Max",
+        "price": 1200,
+        "condition": "Used - Good",
+        "description": "\"Apple MacBook Pro with M4 Max chip.  Exterior appears to be in good condition.  Specifics on RAM, storage, and internal condition are unknown.  Please inquire for more details.\"",
+        "category": "Electronics//Computers//Laptops",
+        "timestamp": "00:32",
+        "frame_filename": "saved_frames/frame_5.jpg"
+    }
+]

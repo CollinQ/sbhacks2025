@@ -1,14 +1,16 @@
 <marketplace_listing_analysis>
 
 Overview of the Video Content:
-The video showcases various clothing items displayed on hangers, mannequins, or folded on a clean surface. The seller provides close-up views of labels, tags, and any specific areas of wear or unique design features. Emphasis is placed on accurate color representation, brand visibility, and fabric details.
+The video shows items intended for marketplace listing, including their condition, key features, and details relevant to potential buyers. The video should clearly display each item from multiple angles to capture important selling points and any wear or damage. Pay attention to details about each item and make sure to make notes about the descripotion. Be very thorough.
 
 Anticipated Challenges:
 
 - Color Accuracy: Lighting may skew the actual color of fabrics, making it harder for buyers to trust photos/videos.
-- Brand Authentication: Ensuring items labeled as designer or high-end are genuine.
-- Sizing Variances: Different brands use different sizing standards, which may lead to buyer confusion.
+- Brand Authentication: Ensuring items labeled as designer or high-end are genuine. Make sure to note any brand logos, tags, or other brand identifiers.
+- Sizing Variances: Different brands use different sizing standards, which may lead to buyer confusion. Make your best guess for the size of the item.
 - Fabric Care & Wear: Clearly noting any pilling, stretching, or fading to set buyer expectations.
+- Condition Assessment: Accurately categorizing item condition within marketplace standards accordin to specific cracks, creases, scratches, stains, etc.
+
 
 Listing Strategy:
 
@@ -16,6 +18,9 @@ Listing Strategy:
 - Color & Fabric Description: Mention official brand color names if available, otherwise use descriptive color terms (e.g., “dusty rose,” “charcoal grey”).
 - Condition Highlight: If the item is pre-washed or has slight wear, be transparent to maintain seller credibility.
 - Size & Measurement Notes: Provide numeric measurements (bust, waist, length) to reduce return/complaint rates.
+- Mobile-First Descriptions: Create descriptions that are easy to read on mobile devices. Be very descriptive.
+- Competitive Pricing: Research similar items on marketplace for price benchmarking
+
 
 Key Video Sections to Note:
 - Close-ups of brand labels and size tags
@@ -29,6 +34,8 @@ Common Clothing Categories:
 - Dresses & Skirts
 - Jackets & Outerwear
 - Footwear & Accessories
+- Hats
+- Socks
 
 Price Estimation Approach:
 - Compare with similar pre-owned listings by the same brand.
@@ -79,15 +86,15 @@ Have I processed all items in the video? No. Will continue with remaining items.
 
 <estimated_item_count>TOTAL_ITEMS_TO_LIST: 10</estimated_item_count>
 
-<column_heading_order>title,price,condition,description,category</column_heading_order>
+<column_heading_order>title,price,condition,description,category,timestamp</column_heading_order>
 
 <csv>
-title,price,condition,description,category
-Nike Men’s Air Max Sneakers Grey Size 10,80,Used - Good,Nike Air Max in grey with subtle white accent. Light scuff marks on soles. Includes original laces but no box.,Clothing//Shoes//Men
-Zara Women’s Denim Jacket Light Wash M,45,Used - Like New,Classic light wash denim jacket by Zara. Slight stretch in sleeves. Original brand tag intact. No tears or stains.,Clothing//Jackets & Outerwear//Women
-H&M Black Skinny Jeans Women’s 28,20,Used - Fair,H&M black skinny jeans with slight fading on knees. Minor fraying at hem. Overall wearable condition.,Clothing//Jeans//Women
-Adidas Hoodie Navy Blue Men’s L,30,Used - Good,Adidas men’s hoodie in navy blue. Kangaroo pocket. Minimal pilling on cuffs. Comfortable fleece lining.,Clothing//Tops//Men
-Vintage Levi’s 501 Jeans Light Blue W34,55,Used - Good,Classic Levi’s 501 with button fly. Light distress on pockets. Authentic Levi’s patch on back waist.,Clothing//Jeans//Men
+title,price,condition,description,category,timestamp
+Nike Men’s Air Max Sneakers Grey Size 10,80,Used - Good,Nike Air Max in grey with subtle white accent. Light scuff marks on soles. Includes original laces but no box.,Clothing//Shoes//Men,00:05
+Zara Women’s Denim Jacket Light Wash M,45,Used - Like New,Classic light wash denim jacket by Zara. Slight stretch in sleeves. Original brand tag intact. No tears or stains. Please reach out to me for more details.,Clothing//Jackets & Outerwear//Women,00:08
+H&M Black Skinny Jeans Women’s 28,20,Used - Fair,H&M black skinny jeans with slight fading on knees. Minor fraying at hem. Overall wearable condition. Please reach out to me for more details.,Clothing//Jeans//Women,00:20
+Adidas Hoodie Navy Blue Men’s L,30,Used - Good,Adidas men’s hoodie in navy blue. Kangaroo pocket. Minimal pilling on cuffs. Comfortable fleece lining. Please reach out to me for more details.,Clothing//Tops//Men,00:23
+Vintage Levi’s 501 Jeans Light Blue W34,55,Used - Good,Classic Levi’s 501 with button fly. Light distress on pockets. Authentic Levi’s patch on back waist. Please reach out to me for more details.,Clothing//Jeans//Men,00:32
 </csv>
 
 <last_processed_timestamp>Last item processed at: 01:42</last_processed_timestamp>

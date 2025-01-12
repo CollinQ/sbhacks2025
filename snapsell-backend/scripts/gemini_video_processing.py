@@ -11,6 +11,8 @@ import pandas as pd
 import time
 from supabase import create_client, Client
 import uuid
+from save_frames import save_frames
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -41,7 +43,7 @@ marketplace_schema = [
             "Used - Good",
             "Used - Fair"
         ],
-        "description": "Item condition using only the supported values. Must match exactly as specified.",
+        "description": "Item condition using only the supported values. Must match exactly as specified. Use video details to determine condition.",
         "example": "New"
     },
     {
@@ -49,7 +51,7 @@ marketplace_schema = [
         "type": "str",
         "required": False,
         "max_length": 5000,
-        "description": "Detailed description of the item including relevant details like size, color, material, and features. Can include formatting and special characters.",
+        "description": "Detailed description of the item including relevant details like size, color, material, and features. Can include formatting and special characters but do not include commas.",
         "example": "A vibrant blue crewneck T-shirt with a Facebook logo for all shapes and sizes. Made from 100% cotton."
     },
     {
@@ -58,6 +60,12 @@ marketplace_schema = [
         "required": False,
         "description": "Category path using forward slashes to indicate hierarchy. Each level should be properly capitalized and use the exact category names from the marketplace.",
         "example": "Clothing, Shoes & Accessories//Men's Clothing//T-Shirts"
+    },
+    {
+        "field": "timestamp",
+        "type": "str",
+        "description": "Time in MM:SS format with leading zeros.",
+        "example": "01:30"
     },
 ]
 
@@ -74,7 +82,7 @@ def setup_gemini_models(api_key: str, system_prompt: str) -> Dict[str, genai.Gen
 
     # Create the model config
     generation_config = {
-        "temperature": 0.5,  # default is 0.2
+        "temperature": 0.2,  # default is 0.2
         "top_p": 0.95,      # default is 0.95
         "top_k": 40,        # default is 40
         "max_output_tokens": 8192,
@@ -106,7 +114,7 @@ def generate_content(prompt: str, model: genai.GenerativeModel):
     """Returns a given model's output for a given prompt."""
     return model.generate_content(prompt)
 
-path_to_video_file = "/Users/vidit/Desktop/sbhacks2025/snapsell-backend/scripts/IMG_1992.MOV"
+path_to_video_file = os.getenv('PATH_TO_VIDEO_FILE')
 
 def setup_video_cache(video_file_upload, system_prompt: str, cache_minutes: int = 15) -> Optional[caching.CachedContent]:
     """Setup and return video content cache."""
@@ -128,7 +136,7 @@ def setup_video_cache(video_file_upload, system_prompt: str, cache_minutes: int 
 
 def get_field_names_as_list() -> List[str]:
     """Returns the expected field names for the marketplace schema."""
-    return ["title", "price", "condition", "description", "category"]
+    return ["title", "price", "condition", "description", "category", "timestamp"]
 
 def quick_check_marketplace_csv(model_output,
                               ideal_number_of_fields: Optional[int] = len(get_field_names_as_list()),
@@ -257,16 +265,15 @@ def upload_items_to_supabase(df: pd.DataFrame, user_id: str) -> List[str]:
     
     # Process each row and upload to Supabase
     for _, row in df.iterrows():
-        item_id = str(uuid.uuid4())
         item_data = {
-            "id": item_id,
+            "id": row['id'],
             "user_id": user_id,
             "title": row['title'],
             "description": row['description'],
             "price": float(row['price']),  # Convert to numeric
             "condition": row['condition'],
-            "status": "active",  # Default status
-            "image_url": None,  # Can be updated later
+            "status": "available",  # Default status
+            "image_url": row['image_url'],  # Can be updated later
         }
         
         # Synchronous insert
@@ -274,7 +281,7 @@ def upload_items_to_supabase(df: pd.DataFrame, user_id: str) -> List[str]:
         
         # Verify successful insertion
         if response.data:
-            item_ids.append(item_id)
+            item_ids.append(response.data[0]['id'])
     
     return item_ids
 
@@ -284,13 +291,15 @@ def main():
     example_1 = load_prompt('example_1.txt')
     example_2 = load_prompt('example_2.txt')
     example_3 = load_prompt('example_3.txt')
+    example_4 = load_prompt('example_4.txt')
     initial_prompt = load_prompt('initial_prompt.txt')
 
     input_prompt_initial = initial_prompt.format(
         csv_input_schema=get_schema_string(),
         example_1=example_1,
         example_2=example_2,
-        example_3=example_3
+        example_3=example_3,
+        example_4=example_4
     )
     
     # Setup models
@@ -344,15 +353,33 @@ def main():
 
     print(model_response_1_csv[:1000])
 
-    # Read CSV with correct column names and include first row as data
+    # Read CSV with correct column names and skip the first row (which is headers)
     df_1 = pd.read_csv(
         io.StringIO(model_response_1_csv), 
-        names=['title', 'price', 'condition', 'description', 'category'],
+        names=['title', 'price', 'condition', 'description', 'category', 'timestamp'],
+        skiprows=1,  # Skip the header row from the CSV
         on_bad_lines="warn"
     )
-    
+    df_final_json = []
     print("[DEBUG] DataFrame head:", df_1.head())
-    item_ids = upload_items_to_supabase(df_1, "d69d4ed1-734b-4c40-8ac6-3b641784505e")
+    for idx, row in df_1.iterrows():
+        item = {
+            "id": str(uuid.uuid4()),
+            "item_number": idx + 1,  # 1-based indexing
+            "title": row['title'],
+            "price": row['price'],
+            "condition": row['condition'],
+            "description": row['description'],
+            "category": row['category'],
+            "timestamp": row['timestamp']
+        }
+        df_final_json.append(item)
+    image_urls = save_frames(df_final_json)
+    
+    # Alternative DataFrame approach
+    df_final = pd.DataFrame(df_final_json)
+    df_final['image_url'] = image_urls
+    item_ids = upload_items_to_supabase(df_final, "d69d4ed1-734b-4c40-8ac6-3b641784505e")
     print(f"[INFO] Successfully uploaded {len(item_ids)} items")
     print(f"[INFO] Item IDs: {item_ids}")
     return item_ids
