@@ -129,5 +129,9 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+<<<<<<< HEAD
 # venv
 venv/
+=======
+*__pycache__*
+>>>>>>> d0d3263 (gitignore)
