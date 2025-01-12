@@ -3,42 +3,36 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { ItemConfirmation } from '../../../components/ItemConfirmation'
-
-interface Item {
-  id: number
-  image: string
-  title: string
-  description: string
-  price: number
-  condition: string
-  status: string
-  confidence: number
-}
+import { useItems } from '../../../context/ItemsContext'
+import { Item } from '../../../types/item'
 
 export default function EditItem() {
   const params = useParams()
   const router = useRouter()
-  const [item, setItem] = useState<Item | null>(null)
+  const { items, loading } = useItems()
+  const [editItem, setEditItem] = useState<Item | null>(null)
 
   useEffect(() => {
-    // TODO: Fetch item data from Supabase using params.id
-    // For now using mock data
-    setItem({
-      id: Number(params.id),
-      image: '/placeholder.svg',
-      title: 'Sample Item',
-      description: 'Sample description',
-      price: 99.99,
-      condition: 'good',
-      status: 'available',
-      confidence: 1
-    })
-  }, [params.id])
+    if (items.length > 0) {
+      const item = items.find((item) => item.id === params.id)
+      if (item) {
+        setEditItem(item)
+      } else {
+        router.push('/inventory')
+      }
+    }
+  }, [items, params.id, router])  
 
-  if (!item) {
+  if (!editItem) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      <div className="text-center py-8">
+        <h2 className="text-2xl font-semibold mb-4">Item not found</h2>
+        <button 
+          onClick={() => router.push('/inventory')} 
+          className="text-blue-600 hover:text-blue-800"
+        >
+          Return to Inventory
+        </button>
       </div>
     )
   }
@@ -46,7 +40,11 @@ export default function EditItem() {
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-8 text-center">Edit Item</h1>
-      <ItemConfirmation items={[item]} editMode={true} />
+      <ItemConfirmation 
+        items={[editItem]} 
+        editMode={true} 
+        onConfirm={() => router.push('/inventory')}
+      />
     </div>
   )
 }

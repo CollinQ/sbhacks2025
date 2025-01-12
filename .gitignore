@@ -128,3 +128,13 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+venv/
+
+facebook_cookies.pkl
+facebook_session.json
+
+
+# venv
+venv/
+*__pycache__*

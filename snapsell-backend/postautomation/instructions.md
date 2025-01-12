@@ -2,7 +2,7 @@
 
 ## 1. Create a Virtual Environment
 python3 -m venv venv
-source venv/bin/activate  # For Windows: .\venv\Scripts\activate
+source venv/bin/activate  
 
 # 2. Install the dependencies
 pip install -r requirements.txt
@@ -13,7 +13,7 @@ echo "CHROMEDRIVER_PATH=/path/to/chromedriver" > .env
 # Replace /path/to/chromedriver with the actual path to your ChromeDriver executable.
 
 ## 4. Run the Script
-python your_script_name.py
+python automate.py
 
 ## 5. Deactivate Virtual Environment (Optional)
 deactivate
