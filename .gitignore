@@ -129,5 +129,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# venv
 venv/
+
+facebook_cookies.pkl
+facebook_session.json
