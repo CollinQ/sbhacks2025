@@ -12,24 +12,15 @@ def timestamp_to_frame(timestamp, fps):
     return int(seconds * fps)
 
 
-def save_frames(df_final_json):
-    # Load environment variables
-    load_dotenv()
+def save_frames(df_final_json, path_to_video_file):
     
-    video_path = os.getenv('PATH_TO_VIDEO_FILE')
-    if not video_path:
-        raise ValueError("PATH_TO_VIDEO_FILE environment variable is not set")
-    
-    if not os.path.exists(video_path):
-        raise FileNotFoundError(f"Video file not found at path: {video_path}")
-        
     # Create a directory to save frames
     output_dir = "saved_frames"
     os.makedirs(output_dir, exist_ok=True)
 
 
     # Load video
-    video_capture = cv2.VideoCapture(video_path)
+    video_capture = cv2.VideoCapture(path_to_video_file)
 
     # Go through video and upload individual frames to Supabase
     if not video_capture.isOpened():
