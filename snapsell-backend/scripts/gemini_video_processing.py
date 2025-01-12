@@ -114,7 +114,6 @@ def generate_content(prompt: str, model: genai.GenerativeModel):
     """Returns a given model's output for a given prompt."""
     return model.generate_content(prompt)
 
-path_to_video_file = os.getenv('PATH_TO_VIDEO_FILE')
 
 def setup_video_cache(video_file_upload, system_prompt: str, cache_minutes: int = 15) -> Optional[caching.CachedContent]:
     """Setup and return video content cache."""
@@ -285,7 +284,7 @@ def upload_items_to_supabase(df: pd.DataFrame, user_id: str) -> List[str]:
     
     return item_ids
 
-def main():
+def main(path_to_video_file):
     # Load prompts
     system_prompt = load_prompt('system_prompt.txt')
     example_1 = load_prompt('example_1.txt')
@@ -313,6 +312,9 @@ def main():
         time.sleep(2)
         video_file_upload = genai.get_file(video_file_upload.name)
     if video_file_upload.state.name == "FAILED":
+        print(f"[ERROR] Video file upload failed")
+        print(f"[ERROR] State: {video_file_upload.state.name}")
+        print(f"[ERROR] Error: {video_file_upload.error}")
         raise ValueError(video_file_upload.state.name)
     
     print(f"[INFO] Video file uploaded: {video_file_upload.name}")
@@ -374,7 +376,7 @@ def main():
             "timestamp": row['timestamp']
         }
         df_final_json.append(item)
-    image_urls = save_frames(df_final_json)
+    image_urls = save_frames(df_final_json, path_to_video_file)
     
     # Alternative DataFrame approach
     df_final = pd.DataFrame(df_final_json)
@@ -387,4 +389,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    path_to_video_file = input("Please enter the path to your video file: ")
+    main(path_to_video_file=path_to_video_file)

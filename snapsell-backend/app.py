@@ -29,7 +29,7 @@ def process_video():
             
         try:
             # Process the video using Gemini
-            result = gemini.main()
+            result = gemini.main(path_to_video_file=video_url)
             print("[DEBUG] Gemini result:", result)
             
             return jsonify({
