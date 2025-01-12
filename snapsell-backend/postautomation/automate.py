@@ -163,6 +163,9 @@ class FacebookSessionManager:
     def create_marketplace_listing(self, title, price, image_path, category, condition, description):
         """Create a new marketplace listing with the provided details."""
         try:
+            if not os.path.exists(image_path):
+                raise Exception(f"Image file not found: {image_path}")
+
             # Click create listing button
             create_listings_button = self.wait.until(
                 EC.presence_of_element_located((
@@ -186,32 +189,48 @@ class FacebookSessionManager:
                 By.XPATH, '//input[@type="file"]'
             )))
             file_input.send_keys(image_path)
-            time.sleep(1)
+            time.sleep(2)  # Give more time for image upload
             
-            # Fill in basic details
-            self._fill_basic_details(title, price)
-            print("filled basic details")
-            # Select category
-            self._select_category(category)
-            print("selected category")
-            # Select condition
-            self._select_condition(condition)
-            print("selected condition")
-            # Fill description
-            self._fill_description(description)
-            print("filled description")
-            # Navigate through steps
-            # self._click_next_button()
-            self._click_next_button()
-            print("clicked next button")
+            try:
+                # Fill in basic details
+                self._fill_basic_details(title, price)
+                print("Filled basic details")
+                
+                # Select category
+                self._select_category(category)
+                print("Selected category")
+                
+                # Select condition
+                self._select_condition(condition)
+                print("Selected condition")
+                
+                # Fill description
+                self._fill_description(description)
+                print("Filled description")
+                
+                # Navigate through steps
+                self._click_next_button()
+                print("Clicked next button")
 
-            self._click_publish_button()
-            time.sleep(5)
-            
-            return True
+                self._click_publish_button()
+                print("Clicked publish button")
+                
+                time.sleep(5)  # Wait for publish to complete
+                return True
+                
+            except Exception as form_error:
+                print(f"Error filling form: {str(form_error)}")
+                # Try to take a screenshot for debugging
+                try:
+                    self.driver.save_screenshot("error_screenshot.png")
+                    print("Error screenshot saved as error_screenshot.png")
+                except:
+                    pass
+                raise form_error
             
         except Exception as e:
-            print(f"Error creating listing: {e}")
+            error_msg = f"Error creating listing: {str(e)}"
+            print(error_msg)
             return False
 
     def _fill_basic_details(self, title, price):
@@ -343,24 +362,25 @@ def main():
             if not session_manager.login(email, password):
                 raise Exception("Login failed")
         
-        # Create new listing
-        image_path = "/Users/mpeng/Desktop/chair.jpg"
-        session_manager.create_marketplace_listing(
-            title="Chair",
-            price=150,
+        # Example listing creation
+        image_path = "/path/to/image.jpg"  # This is just an example
+        success = session_manager.create_marketplace_listing(
+            title="Example Item",
+            price=100,
             image_path=image_path,
             category="Miscellaneous",
-            condition="Used - Good"
+            condition="Used - Good",
+            description="Example description"
         )
-        
-        time.sleep(200)  # Keep browser open for user interaction
+        return success
         
     except Exception as e:
-        print(f"An error occurred: {e}")
-    
+        print(f"Error in main: {e}")
+        return False
     finally:
         session_manager.quit()
 
 
+# Only run main() if this file is run directly
 if __name__ == "__main__":
     main()
