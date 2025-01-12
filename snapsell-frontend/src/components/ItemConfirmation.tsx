@@ -199,9 +199,9 @@ export function ItemConfirmation({ items, onConfirm, editMode = false }: ItemCon
                           id="price"
                           name="price"
                           min="0"
-                          step="0.01"
+                          step="1"
                           className="block w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 ease-in-out sm:text-sm"
-                          value={currentItem.price}
+                          value={Math.round(currentItem.price)}
                           onChange={handleChange}
                           required
                         />
@@ -221,11 +221,10 @@ export function ItemConfirmation({ items, onConfirm, editMode = false }: ItemCon
                         onChange={handleChange}
                         required
                       >
-                        <option value="new">New</option>
-                        <option value="like_new">Like New</option>
-                        <option value="good">Good</option>
-                        <option value="fair">Fair</option>
-                        <option value="poor">Poor</option>
+                        <option value="New">New</option>
+                        <option value="Used - Like New">Used - Like New</option>
+                        <option value="Used - Good">Used - Good</option>
+                        <option value="Used - Fair">Used - Fair</option>
                       </select>
                     </div>
                   </div>

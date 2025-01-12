@@ -3,6 +3,8 @@ import { ItemStatusCard } from '../components/ItemStatusCard'
 import VideoUpload from '../components/VideoUpload'
 import { useItems } from '../context/ItemsContext'
 import { useEffect } from 'react'
+import { Facebook } from 'lucide-react'
+import { postItemsToFacebookMarketplace } from '../utils/facebook'
 
 export default function Home() {
   const { items, loading, refreshItems } = useItems()
@@ -11,13 +13,33 @@ export default function Home() {
     refreshItems()
   }, [])
 
+  const handlePostToFacebook = async () => {
+    try {
+      await postItemsToFacebookMarketplace(items);
+      // Optionally refresh items after posting
+      refreshItems();
+    } catch (error) {
+      // Handle error (you might want to add a toast notification here)
+      console.error('Failed to post to Facebook Marketplace:', error);
+    }
+  };
+
   return (
     <div className="px-4 py-6 sm:px-0">
       <div className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">Upload New Inventory</h2>
         <VideoUpload />
       </div>
-      <h2 className="text-2xl font-semibold mb-4">Current Inventory Status</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold">Current Inventory Status</h2>
+        <button
+          onClick={handlePostToFacebook}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#1877F2] hover:bg-[#166fe0] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1877F2]"
+        >
+          <Facebook className="w-5 h-5 mr-2" />
+          Post to Facebook Marketplace
+        </button>
+      </div>
       {loading ? (
         <div className="text-center py-4">Loading items...</div>
       ) : (

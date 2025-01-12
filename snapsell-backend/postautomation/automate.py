@@ -40,6 +40,7 @@ class FacebookSessionManager:
         """Initialize Chrome driver with optimized settings for Facebook Marketplace."""
         # Set up Chrome options
         chrome_options = Options()
+        chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=1920,1080")
         chrome_options.add_argument("--no-sandbox")
@@ -158,7 +159,7 @@ class FacebookSessionManager:
             print(f"Login failed: {e}")
             return False
 
-    def create_marketplace_listing(self, title, price, image_path, category, condition):
+    def create_marketplace_listing(self, title, price, image_path, category, condition, description):
         """Create a new marketplace listing with the provided details."""
         try:
             # Click create listing button
@@ -196,12 +197,14 @@ class FacebookSessionManager:
             self._select_condition(condition)
             
             # Fill description
-            self._fill_description()
+            self._fill_description(description)
             
             # Navigate through steps
             # self._click_next_button()
             self._click_next_button()
             self._click_publish_button()
+
+            time.sleep(8)
             
             return True
             
@@ -262,14 +265,14 @@ class FacebookSessionManager:
         except Exception as e:
             print(f"Error selecting condition: {e}")
 
-    def _fill_description(self):
+    def _fill_description(self, description):
         """Helper method to fill in listing description."""
         description_span = self.wait.until(EC.presence_of_element_located((
             By.XPATH, '//span[text()="Description"]'
         )))
         description_field = description_span.find_element(By.XPATH, './following::textarea[1]')
         description_field.clear()
-        description_field.send_keys("I am selling a brand new furniture item.")
+        description_field.send_keys(description)
         time.sleep(1)
 
     def _click_next_button(self):
@@ -279,14 +282,13 @@ class FacebookSessionManager:
                 By.XPATH, '//span[contains(text(), "Next")]/ancestor::div[@role="button"]'
             )))
             next_button.click()
-            time.sleep(2)
+            time.sleep(1)
         except Exception as e:
             print(f"Error clicking Next button: {e}")
             
     def _click_publish_button(self):
         """Helper method to click the Next button."""
         try:
-            time.sleep(2)
             publish_button = self.wait.until(EC.presence_of_element_located((
                 By.XPATH, '//span[contains(text(), "Publish")]/ancestor::div[@role="button"]'
             )))

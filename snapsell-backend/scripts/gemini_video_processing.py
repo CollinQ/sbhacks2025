@@ -271,8 +271,9 @@ def upload_items_to_supabase(df: pd.DataFrame, user_id: str) -> List[str]:
             "description": row['description'],
             "price": float(row['price']),  # Convert to numeric
             "condition": row['condition'],
-            "status": "available",  # Default status
+            "status": "unlisted",  # Default status
             "image_url": row['image_url'],  # Can be updated later
+            "category": "Miscellaneous",
         }
         
         # Synchronous insert
