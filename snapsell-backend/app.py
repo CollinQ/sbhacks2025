@@ -16,7 +16,15 @@ supabase: Client = create_client(url, key)
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+# Enable CORS with support for credentials
+CORS(app, supports_credentials=True, resources={
+    r"/api/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"],
+        "supports_credentials": True
+    }
+})
 
 @app.route('/api/post_to_facebook', methods=['POST'])
 def post_to_facebook():
@@ -54,8 +62,7 @@ def post_to_facebook():
                 price=float(item['price']),
                 image_path=temp_image_path,
                 category="Miscellaneous",
-                condition=item['condition'],
-                description=item['description']
+                condition=item['condition']
             )
 
             # Clean up temp file

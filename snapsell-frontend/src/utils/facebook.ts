@@ -2,7 +2,7 @@ export async function postItemsToFacebookMarketplace(items: any[]) {
   try {
     // Filter for only unlisted items
     const unlistedItems = items.filter(item => item.status === 'unlisted');
-    
+    console.log(unlistedItems)
     // Track overall progress
     let totalItems = unlistedItems.length;
     let completedItems = 0;
@@ -14,7 +14,10 @@ export async function postItemsToFacebookMarketplace(items: any[]) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
           },
+          mode: 'cors',
+          credentials: 'include',
           body: JSON.stringify({ item })
         });
 
