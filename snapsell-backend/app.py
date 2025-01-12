@@ -59,10 +59,11 @@ def post_to_facebook():
             # Create listing for the item using local image path
             success = session_manager.create_marketplace_listing(
                 title=item['title'],
-                price=float(item['price']),
+                price=int(item['price']),
                 image_path=temp_image_path,
                 category="Miscellaneous",
-                condition=item['condition']
+                condition=item['condition'],
+                description=item['description']
             )
 
             # Clean up temp file

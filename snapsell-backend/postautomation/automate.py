@@ -158,7 +158,7 @@ class FacebookSessionManager:
             print(f"Login failed: {e}")
             return False
 
-    def create_marketplace_listing(self, title, price, image_path, category, condition):
+    def create_marketplace_listing(self, title, price, image_path, category, condition, description):
         """Create a new marketplace listing with the provided details."""
         try:
             # Click create listing button
@@ -196,7 +196,7 @@ class FacebookSessionManager:
             self._select_condition(condition)
             
             # Fill description
-            self._fill_description()
+            self._fill_description(description)
             
             # Navigate through steps
             # self._click_next_button()
@@ -264,14 +264,14 @@ class FacebookSessionManager:
         except Exception as e:
             print(f"Error selecting condition: {e}")
 
-    def _fill_description(self):
+    def _fill_description(self, description):
         """Helper method to fill in listing description."""
         description_span = self.wait.until(EC.presence_of_element_located((
             By.XPATH, '//span[text()="Description"]'
         )))
         description_field = description_span.find_element(By.XPATH, './following::textarea[1]')
         description_field.clear()
-        description_field.send_keys("I am selling a brand new furniture item.")
+        description_field.send_keys(description)
         time.sleep(1)
 
     def _click_next_button(self):
