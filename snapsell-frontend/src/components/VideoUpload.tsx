@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { Upload, X } from 'lucide-react'
+import { Upload, X, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useItems } from '../context/ItemsContext'
 
@@ -21,6 +21,11 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [progress, setProgress] = useState(0)
+  const [processingStep, setProcessingStep] = useState<string>('')
+
+  // Use a ref to store the "true" current progress
+  const progressRef = useRef(0)
+
   const { confirmItems, updateConfirmItems } = useItems()
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,6 +46,33 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
     setError(null)
   }
 
+  /**
+   * A helper that smoothly increments the progress bar
+   * from the current progress to the targetProgress.
+   */
+  const updateProgress = async (targetProgress: number, step: string) => {
+    setProcessingStep(step)
+
+    // We'll increment by 2 each time for quickness (adjust to your liking)
+    const increment = 2
+    const delay = 50 // 50ms between each increment
+
+    // Make sure we never go backwards if, for some reason, targetProgress < currentRef
+    let current = progressRef.current
+    const actualTarget = Math.max(targetProgress, current)
+
+    while (current < actualTarget) {
+      current += increment
+      if (current > actualTarget) {
+        current = actualTarget
+      }
+      progressRef.current = current
+      setProgress(current)
+
+      await new Promise(resolve => setTimeout(resolve, delay))
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -52,6 +84,8 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
     try {
       setUploading(true)
       setProgress(0)
+      progressRef.current = 0
+      setProcessingStep('Analyzing video frames...')
 
       // Make API request to process video
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/process_video`, {
@@ -60,33 +94,37 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          video_url: file.name, // You might want to pass more info about the video
+          video_url: file.name,
         }),
-      });
+      })
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      const data = await response.json();
-      console.log('Video processing response:', data.data);
+      // Example "stepped" progress
+      await updateProgress(30, 'Sending to AI for analysis...')
+      await updateProgress(55, 'Retrieving item descriptions...')
+      await updateProgress(100, 'Uploading to database...')
+
+      const data = await response.json()
+      console.log('Video processing response:', data.data)
 
       if (onUploadComplete) {
-        onUploadComplete(data.url || '');
+        onUploadComplete(data.url || '')
       }
-
+      
       await updateConfirmItems(data.data || [])
-
-      console.log("Confirm items:", confirmItems)
+      console.log('Confirm items:', confirmItems)
 
       // Navigate after successful processing
-      router.push('/confirm-items');
-
+      router.push('/confirm-items')
     } catch (error) {
-      console.error('Error processing video:', error);
-      setError('Failed to process video. Please try again.');
+      console.error('Error processing video:', error)
+      setError('Failed to process video. Please try again.')
     } finally {
-      setUploading(false);
+      setUploading(false)
+      setProcessingStep('')
     }
   }
 
@@ -94,6 +132,8 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
     setFile(null)
     setError(null)
     setProgress(0)
+    progressRef.current = 0
+    setProcessingStep('')
   }
 
   return (
@@ -111,16 +151,8 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
             <Upload className="mx-auto h-12 w-12 text-gray-400" />
             <div className="mt-2">
               {file ? (
-                <div className="flex items-center justify-center space-x-2">
+                <div className="flex items-center justify-center">
                   <span className="text-sm text-gray-600">{file.name}</span>
-                  <button
-                    type="button"
-                    onClick={clearFile}
-                    className="text-red-500 hover:text-red-700"
-                    disabled={uploading}
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
                 </div>
               ) : (
                 <p className="text-gray-500">
@@ -136,16 +168,17 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
         )}
 
         {uploading && (
-          <div className="space-y-2">
+          <div className="space-y-4">
+            <div className="flex items-center justify-center space-x-2">
+              <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+              <p className="text-sm text-gray-600">{processingStep}</p>
+            </div>
             <div className="h-2 bg-gray-200 rounded-full">
               <div
                 className="h-2 bg-blue-600 rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <p className="text-sm text-gray-600 text-center">
-              Uploading... {progress}%
-            </p>
           </div>
         )}
 
@@ -154,7 +187,7 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
           disabled={!file || uploading}
           className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {uploading ? 'Uploading...' : 'Upload Video'}
+          {uploading ? 'Processing...' : 'Upload Video'}
         </button>
       </form>
     </div>
