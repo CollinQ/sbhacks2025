@@ -4,7 +4,9 @@ from dotenv import load_dotenv
 from supabase import create_client, Client
 from scripts import gemini_video_processing as gemini
 import os
-
+from postautomation.automate import FacebookSessionManager
+import requests
+import tempfile
 # Load environment variables
 load_dotenv()
 
@@ -15,6 +17,66 @@ supabase: Client = create_client(url, key)
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
+
+@app.route('/api/post_to_facebook', methods=['POST'])
+def post_to_facebook():
+    try:
+        data = request.get_json()
+        item = data.get('item')  # Now expecting a single item
+        print(f"[INFO] Received item: {item}")
+
+        # Initialize Facebook session manager
+        session_manager = FacebookSessionManager()
+        session_manager.init_driver()
+
+        try:
+            # Attempt to load existing session or perform new login
+            if not session_manager.load_session():
+                email = os.getenv("FB_EMAIL")
+                password = os.getenv("FB_PASSWORD")
+                if not session_manager.login(email, password):
+                    raise Exception("Facebook login failed")
+
+            # Download image from URL to temp file
+           
+            temp_dir = tempfile.gettempdir()
+            image_url = item['image_url']
+            image_ext = os.path.splitext(image_url.split('?')[0])[1] or '.jpg'
+            temp_image_path = os.path.join(temp_dir, f"temp_image{image_ext}")
+
+            response = requests.get(image_url)
+            with open(temp_image_path, 'wb') as f:
+                f.write(response.content)
+
+            # Create listing for the item using local image path
+            success = session_manager.create_marketplace_listing(
+                title=item['title'],
+                price=float(item['price']),
+                image_path=temp_image_path,
+                category="Miscellaneous",
+                condition=item['condition'],
+                description=item['description']
+            )
+
+            # Clean up temp file
+            os.remove(temp_image_path)
+
+            if not success:
+                raise Exception("Failed to create Facebook listing")
+
+            # Update item status in database if needed
+            # TODO: Add database update logic here
+
+            return jsonify({
+                "status": "success", 
+                "message": f"Item '{item['title']}' posted to Facebook"
+            }), 200
+
+        finally:
+            session_manager.quit()
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/api/process_video', methods=['POST'])
 def process_video():

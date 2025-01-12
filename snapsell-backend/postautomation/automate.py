@@ -202,6 +202,8 @@ class FacebookSessionManager:
             # self._click_next_button()
             self._click_next_button()
             self._click_publish_button()
+
+            time.sleep(5)
             
             return True
             
