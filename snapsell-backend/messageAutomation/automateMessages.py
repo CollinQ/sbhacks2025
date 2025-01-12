@@ -230,7 +230,7 @@ class FacebookSessionManager:
             print(f"An error occurred: {e}")
 
     def _get_item_context(self, item_title):
-        """Extract item details from the conversation."""
+        """Extract item name from the conversation heading."""
         try:
             response = (supabase.table("items")
                 .select("id, title, description, price, condition, status")
@@ -252,10 +252,47 @@ class FacebookSessionManager:
             else:
                 print("Item is not found")
                 return {"title": "Unknown Item", "price": "Unknown Price"}
+
+    def _get_item_title(self):
+        """Extract item name from the conversation heading."""
+        try:
+            # Try multiple selectors in order of specificity
+            selectors = [
+                "div[role='main'] h2 span span span span",  # Most specific selector matching the DOM structure
+                "h2 span span span span",                   # Less specific but still targeting the right structure
+                "span[role='heading']",                     # Fallback using role
+                "span.x150t5mx"                            # Last resort using the class
+            ]
+            
+            heading = None
+            for selector in selectors:
+                try:
+                    heading = self.wait.until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, selector))
+                    )
+                    if heading and heading.text and " · " in heading.text:  # Only accept if it has the expected format
+                        break
+                except:
+                    continue
+            
+            if not heading or not heading.text:
+                print("No heading found with any selector")
+                return "Unknown Item"
+                
+            print(f"Found heading with text: {heading.text}")
+            
+            # Extract item name after the dot
+            full_text = heading.text.strip()
+            if " · " not in full_text:
+                print(f"Warning: Unexpected heading format: {full_text}")
+                return full_text
+                
+            item_name = full_text.split(" · ")[-1]
+            return item_name.strip()
             
         except Exception as e:
             print(f"Error getting item context: {e}")
-            return {"title": "Unknown Item", "price": "Unknown Price"}
+            return "Unknown Item"
 
     def _extract_conversation(self):
         """Extract conversation history with differentiation between buyer and seller messages"""
