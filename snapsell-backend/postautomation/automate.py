@@ -40,7 +40,7 @@ class FacebookSessionManager:
         """Initialize Chrome driver with optimized settings for Facebook Marketplace."""
         # Set up Chrome options
         chrome_options = Options()
-        # chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=1920,1080")
         chrome_options.add_argument("--no-sandbox")
@@ -232,21 +232,52 @@ class FacebookSessionManager:
     def _select_category(self, category):
         """Helper method to select listing category."""
         try:
-            category_span = self.wait.until(EC.presence_of_element_located((
-                By.XPATH, '//span[text()="Category"]'
+            # Wait longer for the initial load
+            time.sleep(3)
+            
+            # First find and click the category input field
+            category_input = self.wait.until(EC.element_to_be_clickable((
+                By.XPATH, '//span[text()="Category"]/following::input[1]'
             )))
+            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", category_input)
             time.sleep(1)
-            category_input = category_span.find_element(By.XPATH, './following::input[1]')
+            
+            # Clear and type the category
             category_input.clear()
-            category_input.send_keys(category)
-            time.sleep(1)
-            category_option = self.wait.until(EC.presence_of_element_located((
-                By.XPATH, f'//span[contains(text(), "{category}")][1]'
-            )))
-            category_option.click()
-            time.sleep(1)
+            for char in category:
+                category_input.send_keys(char)
+                time.sleep(0.1)  # Type slowly to trigger suggestions
+            
+            time.sleep(2)  # Wait for dropdown to appear
+            
+            # Try multiple strategies to find and click the category option
+            try:
+                # Strategy 1: Direct click
+                category_option = self.wait.until(EC.element_to_be_clickable((
+                    By.XPATH, f'//span[contains(text(), "{category}")][1]'
+                )))
+                self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", category_option)
+                time.sleep(1)
+                self.driver.execute_script("arguments[0].click();", category_option)
+            except:
+                try:
+                    # Strategy 2: Find by role
+                    category_option = self.wait.until(EC.element_to_be_clickable((
+                        By.XPATH, f'//div[@role="option"]//span[contains(text(), "{category}")]'
+                    )))
+                    self.driver.execute_script("arguments[0].click();", category_option)
+                except:
+                    # Strategy 3: Use parent element
+                    category_option = self.wait.until(EC.presence_of_element_located((
+                        By.XPATH, f'//span[contains(text(), "{category}")]/parent::div'
+                    )))
+                    self.driver.execute_script("arguments[0].click();", category_option)
+            
+            time.sleep(2)  # Wait for selection to register
+            
         except Exception as e:
             print(f"Error selecting category: {e}")
+            # You might want to add a retry mechanism here
 
     def _select_condition(self, condition):
         """Helper method to select item condition."""
