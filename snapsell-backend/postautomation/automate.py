@@ -189,22 +189,23 @@ class FacebookSessionManager:
             
             # Fill in basic details
             self._fill_basic_details(title, price)
-            
+            print("filled basic details")
             # Select category
             self._select_category(category)
-            
+            print("selected category")
             # Select condition
             self._select_condition(condition)
-            
+            print("selected condition")
             # Fill description
             self._fill_description(description)
-            
+            print("filled description")
             # Navigate through steps
             # self._click_next_button()
             self._click_next_button()
-            self._click_publish_button()
+            print("clicked next button")
 
-            time.sleep(8)
+            self._click_publish_button()
+            time.sleep(6)
             
             return True
             
@@ -217,8 +218,10 @@ class FacebookSessionManager:
         title_span = self.wait.until(EC.presence_of_element_located((
             By.XPATH, '//span[text()="Title"]'
         )))
+        time.sleep(1)
         title_input = title_span.find_element(By.XPATH, './following::input[1]')
         title_input.send_keys(title)
+        time.sleep(1)
         
         price_span = self.wait.until(EC.presence_of_element_located((
             By.XPATH, '//span[text()="Price"]'
@@ -232,11 +235,11 @@ class FacebookSessionManager:
             category_span = self.wait.until(EC.presence_of_element_located((
                 By.XPATH, '//span[text()="Category"]'
             )))
+            time.sleep(1)
             category_input = category_span.find_element(By.XPATH, './following::input[1]')
             category_input.clear()
             category_input.send_keys(category)
             time.sleep(1)
-            
             category_option = self.wait.until(EC.presence_of_element_located((
                 By.XPATH, f'//span[contains(text(), "{category}")][1]'
             )))

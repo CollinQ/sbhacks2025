@@ -1,27 +1,73 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+const SCOPES = 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events';
 
 export default function CalendarIntegration() {
   const [connected, setConnected] = useState(false)
+  const [accessToken, setAccessToken] = useState<string | null>(null)
   const [availableSlots, setAvailableSlots] = useState<string[]>([])
 
-  const handleConnect = () => {
-    // TODO: Implement actual Google Calendar OAuth
+  useEffect(() => {
+    console.log(accessToken)
+    // Load the Google API Client Library
+    const loadGoogleApi = () => {
+      const script = document.createElement('script')
+      script.src = 'https://apis.google.com/js/api.js'
+      script.onload = () => {
+        window.gapi.load('client:auth2', initClient)
+      }
+      document.body.appendChild(script)
+    }
+
+    const initClient = () => {
+      window.gapi.client.init({
+        clientId: GOOGLE_CLIENT_ID,
+        scope: SCOPES,
+        plugin_name: 'SnapSell'
+      }).then(() => {
+        // Check if user is already signed in
+        if (window.gapi.auth2.getAuthInstance().isSignedIn.get()) {
+          handleAuthSuccess()
+        }
+      })
+    }
+
+    loadGoogleApi()
+  }, [])
+
+  const handleAuthSuccess = () => {
+    const authInstance = window.gapi.auth2.getAuthInstance()
+    const currentUser = authInstance.currentUser.get()
+    const token = currentUser.getAuthResponse().access_token
+    setAccessToken(token)
+    console.log(token)
     setConnected(true)
-    // Mock available time slots
-    setAvailableSlots([
-      '2023-05-20 10:00 AM',
-      '2023-05-20 2:00 PM',
-      '2023-05-21 11:00 AM',
-      '2023-05-21 3:00 PM',
-    ])
   }
 
-  const handleDisconnect = () => {
-    // TODO: Implement actual disconnection logic
-    setConnected(false)
-    setAvailableSlots([])
+  const handleConnect = async () => {
+    try {
+      const authInstance = window.gapi.auth2.getAuthInstance()
+      await authInstance.signIn()
+      handleAuthSuccess()
+    } catch (error) {
+      console.error('Error signing in:', error)
+    }
+    console.log(accessToken)
+  }
+
+  const handleDisconnect = async () => {
+    try {
+      const authInstance = window.gapi.auth2.getAuthInstance()
+      await authInstance.signOut()
+      setAccessToken(null)
+      setConnected(false)
+      setAvailableSlots([])
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
   }
 
   return (
@@ -33,25 +79,19 @@ export default function CalendarIntegration() {
       {connected ? (
         <div>
           <p className="text-green-600">Connected to Google Calendar</p>
-          <button
-            onClick={handleDisconnect}
-            className="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-          >
-            Disconnect
-          </button>
-          <div className="mt-4">
-            <h4 className="text-md font-medium">Available Time Slots</h4>
-            <ul className="mt-2 space-y-1">
-              {availableSlots.map((slot, index) => (
-                <li key={index} className="text-sm text-gray-600">{slot}</li>
-              ))}
-            </ul>
+          <div className="flex gap-2">
+            <button
+              onClick={handleDisconnect}
+              className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            >
+              Disconnect
+            </button>
           </div>
         </div>
       ) : (
         <button
           onClick={handleConnect}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >
           Connect to Google Calendar
         </button>
@@ -59,4 +99,3 @@ export default function CalendarIntegration() {
     </div>
   )
 }
-
