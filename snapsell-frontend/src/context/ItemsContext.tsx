@@ -45,8 +45,17 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const updateConfirmItems = (items: Item[]) => {
-    setConfirmItems(items)
+  const updateConfirmItems = async (items_ids: string[]) => {
+    const { data, error } = await supabase
+      .from('items')
+      .select('*')
+      .in('id', items_ids)
+    if (error) {
+      console.error('Error updating item:', error)
+      return
+    }
+    console.log('Updating item:', data)
+    setConfirmItems(data)
   }
 
   useEffect(() => {

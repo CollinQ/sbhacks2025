@@ -11,7 +11,7 @@ import pandas as pd
 import time
 from supabase import create_client, Client
 import uuid
-from save_frames import save_frames
+from .save_frames import save_frames
 
 
 # Load environment variables from .env file

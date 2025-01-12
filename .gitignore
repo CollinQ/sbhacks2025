@@ -129,16 +129,12 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-<<<<<<< HEAD
 venv/
 
 facebook_cookies.pkl
 facebook_session.json
-=======
-<<<<<<< HEAD
+
+
 # venv
 venv/
-=======
 *__pycache__*
->>>>>>> d0d3263 (gitignore)
->>>>>>> 87de3d8 (gitignore)
