@@ -9,6 +9,8 @@ import { useItems } from '../../context/ItemsContext'
 export default function ConfirmItems() {
   const { confirmItems } = useItems()
 
+  console.log('confirmItems', confirmItems)
+
   return (
     <div className="min-h-screen bg-gray-100 py-12">
       <ItemConfirmation items={confirmItems} editMode={true} />

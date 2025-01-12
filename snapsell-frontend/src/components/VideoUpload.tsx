@@ -21,7 +21,7 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [progress, setProgress] = useState(0)
-  const { updateConfirmItems } = useItems()
+  const { confirmItems, updateConfirmItems } = useItems()
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) {
@@ -69,13 +69,15 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
       }
 
       const data = await response.json();
-      console.log('Video processing response:', data);
+      console.log('Video processing response:', data.data);
 
       if (onUploadComplete) {
         onUploadComplete(data.url || '');
       }
 
-      await updateConfirmItems(data.items_ids)
+      await updateConfirmItems(data.data || [])
+
+      console.log("Confirm items:", confirmItems)
 
       // Navigate after successful processing
       router.push('/confirm-items');

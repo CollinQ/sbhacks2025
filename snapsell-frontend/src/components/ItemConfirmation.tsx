@@ -24,6 +24,8 @@ export function ItemConfirmation({ items, onConfirm, editMode = false }: ItemCon
   const [currentIndex, setCurrentIndex] = useState(0)
   const router = useRouter()
 
+  console.log("CONFIRM ITEMS: ", items)
+
   // Return early if no items
   if (!items || items.length === 0) {
     return (
@@ -85,17 +87,15 @@ export function ItemConfirmation({ items, onConfirm, editMode = false }: ItemCon
           return
         }
         console.log('Updating item:', data)
-        router.push('/inventory')
+        if (currentIndex < items.length - 1) {
+          handleNext()
+        } else {
+          router.push('/inventory')
+        }
       } else {
         const { data, error } = await supabase
           .from('items')
-          .insert({
-            title: editedItems[currentIndex].title,
-            description: editedItems[currentIndex].description,
-            price: editedItems[currentIndex].price,
-            condition: editedItems[currentIndex].condition,
-            status: editedItems[currentIndex].status,
-          })
+          .insert(editedItems)
           .select()
         
         if (error) {
@@ -104,7 +104,11 @@ export function ItemConfirmation({ items, onConfirm, editMode = false }: ItemCon
         }
         console.log('Creating items:', data)
         onConfirm(editedItems)
-        router.push('/inventory')
+        if (currentIndex < items.length - 1) {
+          handleNext()
+        } else { 
+          router.push('/inventory')
+        }
       }
     } catch (error) {
       console.error('Error saving items:', error)
@@ -231,8 +235,7 @@ export function ItemConfirmation({ items, onConfirm, editMode = false }: ItemCon
 
             {/* Footer Actions */}
             <div className="px-8 py-4 bg-gray-50/50 flex items-center justify-between border-t border-gray-100">
-              {!editMode && (
-                <button
+                {currentIndex !== 0 &&<button
                   type="button"
                   onClick={handlePrevious}
                   disabled={currentIndex === 0}
@@ -240,19 +243,17 @@ export function ItemConfirmation({ items, onConfirm, editMode = false }: ItemCon
                 >
                   <ChevronLeft className="h-5 w-5 mr-2" />
                   Previous
-                </button>
-              )}
-              
+                </button>}
               <div className="flex-1 flex justify-center">
-                <button
+                {currentIndex === items.length - 1 && <button
                   type="submit"
                   className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 ease-in-out transform hover:scale-105"
                 >
-                  {editMode ? 'Save Changes' : 'Submit Item'}
-                </button>
+                  {items.length === 1 ? 'Submit Item' : 'Submit All Items'}
+                </button>}
               </div>
 
-              {!editMode && currentIndex !== items.length - 1 && (
+              {currentIndex !== items.length - 1 && (
                 <button
                   type="button"
                   onClick={handleNext}

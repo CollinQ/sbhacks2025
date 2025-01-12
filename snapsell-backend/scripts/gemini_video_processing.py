@@ -353,7 +353,7 @@ def main(path_to_video_file):
         print(f"[INFO] CSV fix required? {fix_csv_1_required}")
         print(f"[INFO] Fixes to do:\n{csv_fixes_to_do_1}")
 
-    print(model_response_1_csv[:1000])
+        print(model_response_1_csv[:1000])
 
     # Read CSV with correct column names and skip the first row (which is headers)
     df_1 = pd.read_csv(
@@ -386,7 +386,8 @@ def main(path_to_video_file):
     print(f"[INFO] Item IDs: {item_ids}")
     return item_ids
 
-
+    except Exception as e:
+        print(f"[ERROR] An error occurred: {e}")
 
 if __name__ == "__main__":
     path_to_video_file = input("Please enter the path to your video file: ")

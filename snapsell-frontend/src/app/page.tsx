@@ -2,9 +2,14 @@
 import { ItemStatusCard } from '../components/ItemStatusCard'
 import VideoUpload from '../components/VideoUpload'
 import { useItems } from '../context/ItemsContext'
+import { useEffect } from 'react'
 
 export default function Home() {
-  const { items, loading } = useItems()
+  const { items, loading, refreshItems } = useItems()
+
+  useEffect(() => {
+    refreshItems()
+  }, [])
 
   return (
     <div className="px-4 py-6 sm:px-0">
