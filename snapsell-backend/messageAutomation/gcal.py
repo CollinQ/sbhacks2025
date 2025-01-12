@@ -72,29 +72,6 @@ def create_calendar_event(summary, description, start_time, end_time, attendees=
         print(f'An error occurred: {error}')
         return None
 
-def quick_create_meeting(title, duration_minutes=30, attendees=None):
-    """
-    Quickly create a meeting starting from now.
-    
-    Args:
-        title (str): Title of the meeting
-        duration_minutes (int): Duration of meeting in minutes
-        attendees (list, optional): List of attendee email addresses
-    
-    Returns:
-        dict: Created event object if successful, None otherwise
-    """
-    start_time = datetime.now()
-    end_time = start_time + timedelta(minutes=duration_minutes)
-    
-    return create_calendar_event(
-        summary=title,
-        description=f"Meeting: {title}",
-        start_time=start_time,
-        end_time=end_time,
-        attendees=attendees
-    )
-
 def get_calendar_availability(days=14, start_hour=9, end_hour=21):
     """
     Get calendar availability for the specified number of days.
@@ -161,30 +138,31 @@ def get_calendar_availability(days=14, start_hour=9, end_hour=21):
         print(f'An error occurred: {error}')
         return None
 
-# Create a meeting for tomorrow at 1 PM
-tomorrow = datetime.now() + timedelta(days=1)
-start_time = tomorrow.replace(hour=13, minute=0, second=0, microsecond=0)
-end_time = tomorrow.replace(hour=13, minute=15, second=0, microsecond=0)
+if __name__ == "__main__":
+    # Create a meeting for tomorrow at 1 PM
+    tomorrow = datetime.now() + timedelta(days=1)
+    start_time = tomorrow.replace(hour=13, minute=0, second=0, microsecond=0)
+    end_time = tomorrow.replace(hour=13, minute=15, second=0, microsecond=0)
 
-meeting = create_calendar_event(
-    summary="Meeting to Sell iPad",
-    description="Meeting to discuss and complete iPad sale",
-    start_time=start_time,
-    end_time=end_time,
-    attendees=['example@email.com'],
-    location=None
-)
+    meeting = create_calendar_event(
+        summary="Meeting to Sell iPad",
+        description="Meeting to discuss and complete iPad sale",
+        start_time=start_time,
+        end_time=end_time,
+        attendees=['example@email.com'],
+        location=None
+    )
 
-# Get and print availability
-availability = get_calendar_availability()
-if availability:
-    print("\nCalendar Availability for Next 2 Weeks:")
-    print("=====================================")
-    for date, events in availability.items():
-        print(f"\nDate: {date}")
-        if events:
-            print("Busy times:")
-            for event in events:
-                print(f"  - {event['start_time']} to {event['end_time']}: {event['summary']}")
-        else:
-            print("  No events scheduled")
+    # Get and print availability
+    availability = get_calendar_availability()
+    if availability:
+        print("\nCalendar Availability for Next 2 Weeks:")
+        print("=====================================")
+        for date, events in availability.items():
+            print(f"\nDate: {date}")
+            if events:
+                print("Busy times:")
+                for event in events:
+                    print(f"  - {event['start_time']} to {event['end_time']}: {event['summary']}")
+            else:
+                print("  No events scheduled")

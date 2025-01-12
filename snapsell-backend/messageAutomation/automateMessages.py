@@ -205,6 +205,8 @@ class FacebookSessionManager:
                             .execute()
                         )
                     
+                    ai_agent.detect_meeting(conversation_history, response, item_title)
+
                     time.sleep(2) 
 
                 # Find unvisited chats

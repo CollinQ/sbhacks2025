@@ -1,4 +1,7 @@
 from anthropic import Anthropic
+from gcal import get_calendar_availability, create_calendar_event
+import re
+from datetime import datetime, timedelta
 
 class MarketplaceAIAgent:
     def __init__(self, anthropic_api_key):
@@ -39,6 +42,7 @@ class MarketplaceAIAgent:
             return 1  
 
     def generate_response(self, conversation_history, item_context, stage):
+        availability = get_calendar_availability()
         stage_prompts = {
             1: f"""You are a helpful marketplace seller assistant. Given the following context about an item and conversation history, provide a friendly and informative response to questions about the product:
 - make your response 1 to 2 sentences
@@ -64,8 +68,12 @@ Conversation History: {conversation_history}""",
 - make your response 1 to 2 sentences
 - don't list any unnecessary details
 - talk casually
+- If the buyer mentions a time to pick up their item, then check the availability to see if the seller is free
+- If the buyer asks for your availability, choose a date from the following availability
+Availability: {availability}
 Product Context: {item_context}
-Conversation History: {conversation_history}"""
+Conversation History: {conversation_history}
+"""
         }
 
         message = self.client.messages.create(
@@ -105,3 +113,72 @@ Respond with just one word out of these: unlisted, listed, negotiating, schedule
         if response not in ["unlisted", "listed", "negotiating", "scheduled", "sold"]:
             return "listed"
         return response
+    
+    def detect_meeting(self, conversation_history, response, item_title):
+        current_date = datetime.now()
+        prompt = f"""Given this conversation and response, determine if a specific meeting time has been agreed upon.
+Conversation History:
+{conversation_history}
+
+AI's Response:
+{response}
+
+Rules:
+- Look for specific times (e.g., "3:00 PM", "3PM", etc.)
+- Look for specific dates (e.g., "tomorrow", "Monday", "January 15")
+- Both time AND date must be present to consider it a confirmed meeting
+- This is the current date {current_date}
+- Make the scheduling in the year 2025
+
+Return the response in this EXACT format:
+date: YYYY-MM-DD
+time: HH:MM AM/PM
+
+If no meeting is confirmed, return exactly:
+date: none
+time: none"""
+
+        message = self.client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=40,
+            temperature=0.1,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        response_text = message.content[0].text.strip()
+        print("Claude response:", response_text)
+        
+        # Parse the response
+        try:
+            lines = response_text.split('\n')
+            date = lines[0].split('date: ')[1].strip()
+            time = lines[1].split('time: ')[1].strip()
+            
+            if date == 'none' or time == 'none':
+                print("No confirmed meeting time found")
+                return False
+                
+            # Combine date and time
+            meeting_time = f"{date} {time}"
+            print("Parsed meeting time:", meeting_time)
+            
+            # Parse the datetime
+            start_time = datetime.strptime(meeting_time, "%Y-%m-%d %I:%M %p")
+            print("Start time:", start_time)
+            end_time = start_time + timedelta(minutes=30)
+            
+            event = create_calendar_event(
+                summary=f"Meeting to Sell {item_title}",
+                description=f"Meeting to discuss and complete {item_title} sale",
+                start_time=start_time,
+                end_time=end_time,
+                attendees=None,
+                location="UCSB Library"
+            )
+            
+            if event:
+                print(f"Meeting scheduled successfully for {meeting_time}")
+                return True
+                
+        except Exception as e:
+            print(f"Error processing meeting time: {e}")
+            return False
