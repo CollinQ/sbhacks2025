@@ -5,10 +5,12 @@ import { createClient } from '@supabase/supabase-js'
 import { Item } from '../types/item'
 
 interface ItemsContextType {
+  confirmItems: Item[]
   items: Item[]
   loading: boolean
   error: Error | null
   refreshItems: () => Promise<void>
+  updateConfirmItems: (items: Item[]) => void
 }
 
 const ItemsContext = createContext<ItemsContextType | undefined>(undefined)
@@ -19,6 +21,7 @@ const supabase = createClient(
 )
 
 export function ItemsProvider({ children }: { children: ReactNode }) {
+  const [confirmItems, setConfirmItems] = useState<Item[]>([])
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
@@ -42,12 +45,16 @@ export function ItemsProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const updateConfirmItems = (items: Item[]) => {
+    setConfirmItems(items)
+  }
+
   useEffect(() => {
     fetchItems()
   }, [])
 
   return (
-    <ItemsContext.Provider value={{ items, loading, error, refreshItems: fetchItems }}>
+    <ItemsContext.Provider value={{ confirmItems, items, loading, error, refreshItems: fetchItems, updateConfirmItems }}>
       {children}
     </ItemsContext.Provider>
   )

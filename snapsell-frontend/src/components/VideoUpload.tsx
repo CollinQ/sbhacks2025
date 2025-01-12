@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { Upload, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useItems } from '../context/ItemsContext'
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -20,6 +21,7 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [progress, setProgress] = useState(0)
+  const { updateConfirmItems } = useItems()
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) {
@@ -52,26 +54,77 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
       setProgress(0)
 
       // Make API request to process video
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/process_video`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          video_url: file.name, // You might want to pass more info about the video
-        }),
-      });
+      // const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/process_video`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({
+      //     video_url: file.name, // You might want to pass more info about the video
+      //   }),
+      // });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      // if (!response.ok) {
+      //   throw new Error(`HTTP error! status: ${response.status}`);
+      // }
 
-      const data = await response.json();
-      console.log('Video processing response:', data);
+      // const data = await response.json();
+      // console.log('Video processing response:', data);
 
-      if (onUploadComplete) {
-        onUploadComplete(data.url || '');
-      }
+      // if (onUploadComplete) {
+      //   onUploadComplete(data.url || '');
+      // }
+
+      updateConfirmItems([
+          { 
+            id: 1, 
+            image_url: 'https://imgvrvsheaucvxnlqmqz.supabase.co/storage/v1/object/public/item-images/u2548699992_A_boy_in_Indonesia_stands_with_a_confident_look_p_c42b35ff-0382-45ea-9651-4063f1933a75_0.png?t=2025-01-11T19%3A49%3A09.127Z', 
+            title: 'Vintage Chair',
+            description: 'Beautiful vintage chair in great condition', 
+            price: 50, 
+            status: 'available',
+            condition: 'good',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            user_id: process.env.NEXT_PUBLIC_USER_ID
+          },
+          { 
+            id: 2, 
+            image_url: '/placeholder.svg', 
+            title: 'Antique Lamp',
+            description: 'Antique brass lamp from the 1920s', 
+            price: 75, 
+            status: 'available',
+            condition: 'fair',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            user_id: process.env.NEXT_PUBLIC_USER_ID
+          },
+          { 
+            id: 3, 
+            image_url: '/placeholder.svg', 
+            title: 'Modern Coffee Table',
+            description: 'Modern glass and steel coffee table', 
+            price: 120, 
+            status: 'available',
+            condition: 'like_new',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            user_id: process.env.NEXT_PUBLIC_USER_ID
+          },
+          { 
+            id: 4, 
+            image_url: '/placeholder.svg', 
+            title: 'Wooden Bookshelf',
+            description: 'Solid wood bookshelf with 5 shelves', 
+            price: 80, 
+            status: 'available',
+            condition: 'good',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            user_id: process.env.NEXT_PUBLIC_USER_ID
+          }
+        ])
 
       // Navigate after successful processing
       router.push('/confirm-items');
