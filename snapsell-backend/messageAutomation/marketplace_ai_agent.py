@@ -59,7 +59,7 @@ Product Context: {item_context}
 Conversation History: {conversation_history}""",
             
             3: f"""You are a marketplace seller assistant coordinating a meetup. Given the following context and conversation, provide a response that:
-- Be insistent that the meeting location must be at user's current address
+- Be insistent that the meeting location must be at the seller's address if the item is not transportable. Otherwise, meet at UCSB Library
 - Proposes clear meeting times
 - make your response 1 to 2 sentences
 - don't list any unnecessary details
