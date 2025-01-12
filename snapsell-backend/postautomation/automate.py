@@ -57,7 +57,8 @@ class FacebookSessionManager:
         # Initialize driver and wait
         service = Service(self.driver_path)
         self.driver = webdriver.Chrome(service=service, options=chrome_options)
-        self.wait = WebDriverWait(self.driver, 10)
+        self.wait = WebDriverWait(self.driver, 5)
+        # self.driver.minimize_window()
         return self.driver
 
     def save_session(self):
@@ -205,7 +206,7 @@ class FacebookSessionManager:
             print("clicked next button")
 
             self._click_publish_button()
-            time.sleep(6)
+            time.sleep(5)
             
             return True
             
@@ -233,24 +234,17 @@ class FacebookSessionManager:
         """Helper method to select listing category."""
         try:
             # Wait longer for the initial load
-            time.sleep(3)
+            time.sleep(2)
             
             # First find and click the category input field
             category_input = self.wait.until(EC.element_to_be_clickable((
                 By.XPATH, '//span[text()="Category"]/following::input[1]'
             )))
             self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", category_input)
-            time.sleep(1)
-            
-            # Clear and type the category
+            time.sleep(2)# Clear and type the category
             category_input.clear()
-            for char in category:
-                category_input.send_keys(char)
-                time.sleep(0.1)  # Type slowly to trigger suggestions
+            category_input.send_keys(category)
             
-            time.sleep(2)  # Wait for dropdown to appear
-            
-            # Try multiple strategies to find and click the category option
             try:
                 # Strategy 1: Direct click
                 category_option = self.wait.until(EC.element_to_be_clickable((
@@ -273,7 +267,7 @@ class FacebookSessionManager:
                     )))
                     self.driver.execute_script("arguments[0].click();", category_option)
             
-            time.sleep(2)  # Wait for selection to register
+            time.sleep(1)  # Wait for selection to register
             
         except Exception as e:
             print(f"Error selecting category: {e}")
@@ -289,7 +283,7 @@ class FacebookSessionManager:
                 By.XPATH, './following::div[contains(@class, "xjyslct")][1]'
             )
             condition_input.click()
-            time.sleep(1)
+            time.sleep(2)
             
             condition_option = self.wait.until(EC.presence_of_element_located((
                 By.XPATH, f'//div[@role="option"]//span[text()="{condition}"]'
@@ -307,7 +301,6 @@ class FacebookSessionManager:
         description_field = description_span.find_element(By.XPATH, './following::textarea[1]')
         description_field.clear()
         description_field.send_keys(description)
-        time.sleep(1)
 
     def _click_next_button(self):
         """Helper method to click the Next button."""

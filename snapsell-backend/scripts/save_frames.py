@@ -7,7 +7,7 @@ from supabase import create_client, Client
 def timestamp_to_frame(timestamp, fps):
     print(f"[DEBUG] Timestamp: {timestamp}")
     timestamp_parts = timestamp.split(":")
-    seconds = int(timestamp_parts[0]) * 60 + int(timestamp_parts[1]) + 2
+    seconds = int(timestamp_parts[0]) * 60 + int(timestamp_parts[1]) + 4
     print(f"[DEBUG] Seconds: {int(seconds)}")
     return int(seconds * fps)
 
