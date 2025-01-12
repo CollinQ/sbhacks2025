@@ -6,10 +6,10 @@ export interface Item {
   description: string
   price: number
   condition: string
-  status: 'negotiating' | 'scheduled' | 'sold' | 'listed' | 'available' | string
+  status: 'scheduled' | 'sold' | 'listed' | 'unlisted' | string
   created_at?: string
   updated_at?: string
 }
 
-export type ItemStatus = 'active' | 'sold' | 'negotiating' | 'scheduled'
+export type ItemStatus = 'active' | 'sold'  | 'scheduled' | 'unlisted'
 
