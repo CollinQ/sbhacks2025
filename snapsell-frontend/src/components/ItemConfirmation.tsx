@@ -6,6 +6,12 @@ import { useRouter } from 'next/navigation'
 import { ChevronLeft, ChevronRight, DollarSign } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Item } from '../types/item'
+import { createClient } from '@supabase/supabase-js'
+import { useItems } from '../context/ItemsContext'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 interface ItemConfirmationProps {
   items: Item[]
@@ -14,6 +20,7 @@ interface ItemConfirmationProps {
 }
 
 export function ItemConfirmation({ items, onConfirm, editMode = false }: ItemConfirmationProps) {
+  const { refreshItems } = useItems()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [editedItems, setEditedItems] = useState<Item[]>(items.map(item => ({
     ...item,
@@ -45,18 +52,48 @@ export function ItemConfirmation({ items, onConfirm, editMode = false }: ItemCon
     e.preventDefault()
     try {
       if (editMode) {
-        // TODO: Update item in Supabase
-        console.log('Updating item:', editedItems[0])
+        const { data, error } = await supabase
+          .from('items')
+          .update({
+            title: editedItems[currentIndex].title,
+            description: editedItems[currentIndex].description,
+            price: editedItems[currentIndex].price,
+            condition: editedItems[currentIndex].condition,
+            status: editedItems[currentIndex].status,
+          })
+          .eq('id', editedItems[currentIndex].id)
+          .select()
+        
+        if (error) {
+          console.error('Error updating item:', error)
+          return
+        }
+        console.log('Updating item:', data)
         router.push('/inventory')
       } else {
-        // TODO: Create new items in Supabase
-        console.log('Creating items:', editedItems)
+        const { data, error } = await supabase
+          .from('items')
+          .insert({
+            title: editedItems[currentIndex].title,
+            description: editedItems[currentIndex].description,
+            price: editedItems[currentIndex].price,
+            condition: editedItems[currentIndex].condition,
+            status: editedItems[currentIndex].status,
+          })
+          .select()
+        
+        if (error) {
+          console.error('Error creating items:', error)
+          return
+        }
+        console.log('Creating items:', data)
         onConfirm(editedItems)
         router.push('/inventory')
       }
     } catch (error) {
       console.error('Error saving items:', error)
     }
+    refreshItems()
   }
 
   return (
