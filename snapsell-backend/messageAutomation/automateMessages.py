@@ -12,6 +12,21 @@ import json
 import os
 from dotenv import load_dotenv
 from marketplace_ai_agent import MarketplaceAIAgent
+from supabase import create_client, Client
+
+load_dotenv()
+
+url: str = os.environ.get("SUPABASE_PROJECT_URL")
+key: str = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+supabase: Client = create_client(url, key)
+
+status_table = {
+    "unlisted": 0,
+    "listed": 1,
+    "negotiating": 2,
+    "scheduled": 3,
+    "sold": 4,
+}
 
 class FacebookSessionManager:
     def __init__(self, driver_path=None):
@@ -159,62 +174,85 @@ class FacebookSessionManager:
 
             print(f"Found {len(unvisited_chats)} unvisited chats")
 
+            ai_agent = MarketplaceAIAgent(os.environ.get("ANTHROPIC_API_KEY"))
+
             for chat in unvisited_chats:
                 try:
-                    # Scroll the chat into view and click it
                     self.driver.execute_script("arguments[0].scrollIntoView(true);", chat)
-                    time.sleep(1)  # Give time for smooth scrolling
+                    time.sleep(1)  
                     chat.click()
                     
-                    # Wait for conversation to load
                     time.sleep(2)
                     
-                    # Extract conversation
                     conversation_history = self._extract_conversation()
                     print("Extracted conversation:")
                     print(conversation_history)
                     
-                    # # Get item context
-                    # item_context = self._get_item_context()
+                    # Get item context
+                    item_title = "Apple AirPods Max Headphones Grey"
+                    item_context = self._get_item_context(item_title)
+
+                    if item_context["status"] == "sold":
+                        response = "Sorry this item is sold."
                     
-                    # # Detect conversation stage and generate response
-                    # stage = ai_agent.detect_stage(conversation_history, item_context)
-                    # response = ai_agent.generate_response(conversation_history, item_context, stage)
+                    else:
+                        stage = ai_agent.detect_stage(conversation_history, item_context)
+                        print(stage)
+                        response = ai_agent.generate_response(conversation_history, item_context, stage)
+                        print(response)
+
+                    message_input = self.wait.until(EC.presence_of_element_located((
+                        By.CSS_SELECTOR, "div[role='textbox']"
+                    )))
+                    message_input.send_keys(response)
+                    message_input.send_keys(Keys.RETURN)
+
+                    item_status = ai_agent.get_status(conversation_history, response)
+                    print("item status: ", item_status)
+                    curr_status = item_context["status"]
+                    if status_table[item_status] > status_table[curr_status]:
+                        response = (
+                            supabase.table("items")
+                            .update({"status": item_status})
+                            .eq("id", item_context["id"])
+                            .execute()
+                        )
                     
-                    # # Send response
-                    # message_input = self.wait.until(EC.presence_of_element_located((
-                    #     By.CSS_SELECTOR, "div[role='textbox']"
-                    # )))
-                    # message_input.send_keys(response)
-                    # message_input.send_keys(Keys.RETURN)
-                    
-                    time.sleep(2)  # Wait for message to send
+                    time.sleep(2) 
                     
                 except Exception as e:
                     print(f"No more unread messages found or error occurred: {e}")
                     break
 
-            time.sleep(200)
+            time.sleep(10)
 
         except Exception as e:
             print(f"An error occurred: {e}")
 
-    def _get_item_context(self):
+    def _get_item_context(self, item_title):
         """Extract item details from the conversation."""
         try:
-            item_title = self.wait.until(EC.presence_of_element_located((
-                By.CSS_SELECTOR, "span[role='heading']"
-            )))
-            item_price = self.wait.until(EC.presence_of_element_located((
-                By.CSS_SELECTOR, "span[class*='price']"
-            )))
+            response = (supabase.table("items")
+                .select("id, title, description, price, condition, status")
+                .eq("title", item_title)
+                .execute()
+            )
+            print("got response from db", response)
             
-            return {
-                "title": item_title.text,
-                "price": item_price.text,
-                "condition": "New",  # You'll need to extract this
-                "location": "Local pickup"  # You'll need to extract this
-            }
+            if response.data:
+                item = response.data[0]
+                return {
+                    "id": item.get("id", "Unknown"),
+                    "title": item.get("title", "Unknown"),
+                    "price": item.get("price", "Unknown"),
+                    "condition": item.get("condition", "Unknown"),
+                    "description": item.get("description", ""),
+                    "status": item.get("status", "Available")
+                }
+            else:
+                print("Item is not found")
+                return {"title": "Unknown Item", "price": "Unknown Price"}
+            
         except Exception as e:
             print(f"Error getting item context: {e}")
             return {"title": "Unknown Item", "price": "Unknown Price"}
@@ -272,6 +310,7 @@ def main():
             password = os.getenv("FB_PASSWORD")
             if not session_manager.login(email, password):
                 raise Exception("Login failed")
+        session_manager.automate_messages()
         JS_PATH = "//path/to/button"
         session_manager.automate_messages()
         
