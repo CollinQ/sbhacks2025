@@ -24,17 +24,29 @@ def process_video():
         
         if not video_url:
             return jsonify({"error": "No video URL provided"}), 400
+
+        print("[DEBUG] Received video_url:", video_url)
             
-        # Process the video using Gemini
-        result = gemini.main()
-        
-        return jsonify({
-            "status": "success",
-            "message": "Video processing completed",
-            "data": result
-        }), 200
+        try:
+            # Process the video using Gemini
+            result = gemini.main()
+            print("[DEBUG] Gemini result:", result)
+            
+            return jsonify({
+                "status": "success",
+                "message": "Video processing completed",
+                "data": result
+            }), 200
+            
+        except Exception as e:
+            print("[ERROR] Error in Gemini processing:", str(e))
+            return jsonify({
+                "status": "error",
+                "message": f"Error in video processing: {str(e)}"
+            }), 500
         
     except Exception as e:
+        print("[ERROR] Error in route:", str(e))
         return jsonify({
             "status": "error",
             "message": str(e)
