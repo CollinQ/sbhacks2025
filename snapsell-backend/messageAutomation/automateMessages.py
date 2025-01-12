@@ -156,40 +156,27 @@ class FacebookSessionManager:
             # Navigate directly to Facebook Messages
             self.driver.get("https://www.facebook.com/messages/t/")
             time.sleep(2)  # Wait for page to load
-            
-            # Click on Marketplace tab
-            marketplace_chats = self.wait.until(EC.presence_of_element_located((
-                By.XPATH, '//span[text()="Marketplace"]'
-            )))
-            marketplace_chats.click()
-
-            # Find unvisited chats
-            try:
-                unvisited_chats = self.wait.until(EC.presence_of_all_elements_located((
-                    By.CSS_SELECTOR, 'span.xeuugli.xveuv9e'
-                )))
-            except Exception as e:
-                print(f"Error finding unvisited chats: {e}, 0 unvisited chats found")
-                return
-
-            print(f"Found {len(unvisited_chats)} unvisited chats")
 
             ai_agent = MarketplaceAIAgent(os.environ.get("ANTHROPIC_API_KEY"))
 
-            for chat in unvisited_chats:
-                try:
-                    self.driver.execute_script("arguments[0].scrollIntoView(true);", chat)
-                    time.sleep(1)  
-                    chat.click()
-                    
-                    time.sleep(2)
-                    
+            while True:
+
+                marketplace_chats = self.wait.until(EC.presence_of_element_located((
+                By.XPATH, '//span[text()="Marketplace"]'
+                )))
+                marketplace_chats.click()
+                time.sleep(1)
+
+                isRecentMessageFromBuyer = self._extract_conversation(True)
+
+                if (isRecentMessageFromBuyer):
                     conversation_history = self._extract_conversation()
                     print("Extracted conversation:")
                     print(conversation_history)
                     
                     # Get item context
-                    item_title = "Apple AirPods Max Headphones Grey"
+                    item_title = self._get_item_title()
+                    print(item_title)
                     item_context = self._get_item_context(item_title)
 
                     if item_context["status"] == "sold":
@@ -219,15 +206,74 @@ class FacebookSessionManager:
                         )
                     
                     time.sleep(2) 
-                    
-                except Exception as e:
-                    print(f"No more unread messages found or error occurred: {e}")
-                    break
 
-            time.sleep(10)
+                # Find unvisited chats
+                try:
+                    unvisited_chats = self.wait.until(EC.presence_of_all_elements_located((
+                        By.CSS_SELECTOR, 'span.xeuugli.xveuv9e'
+                    )))
+                    print(f"Found {len(unvisited_chats)} unvisited chats")
+                except Exception as e:
+                    print(f"Error finding unvisited chats: {e}, 0 unvisited chats found")
+                    unvisited_chats = []
+
+                if unvisited_chats:
+                    for chat in unvisited_chats:
+                        try:
+                            self.driver.execute_script("arguments[0].scrollIntoView(true);", chat)
+                            time.sleep(1)  
+                            chat.click()
+                            
+                            time.sleep(2)
+                            
+                            conversation_history = self._extract_conversation()
+                            print("Extracted conversation:")
+                            print(conversation_history)
+                            
+                            # Get item context
+                            item_title = self._get_item_title()
+                            print(item_title)
+                            item_context = self._get_item_context(item_title)
+
+                            if item_context["status"] == "sold":
+                                response = "Sorry this item is sold."
+                            
+                            else:
+                                stage = ai_agent.detect_stage(conversation_history, item_context)
+                                print(stage)
+                                response = ai_agent.generate_response(conversation_history, item_context, stage)
+                                print(response)
+
+                            message_input = self.wait.until(EC.presence_of_element_located((
+                                By.CSS_SELECTOR, "div[role='textbox']"
+                            )))
+                            message_input.send_keys(response)
+                            message_input.send_keys(Keys.RETURN)
+
+                            item_status = ai_agent.get_status(conversation_history, response)
+                            print("item status: ", item_status)
+                            curr_status = item_context["status"]
+                            if status_table[item_status] > status_table[curr_status]:
+                                response = (
+                                    supabase.table("items")
+                                    .update({"status": item_status})
+                                    .eq("id", item_context["id"])
+                                    .execute()
+                                )
+                            
+                            time.sleep(2) 
+                            
+                        except Exception as e:
+                            print(f"No more unread messages found or error occurred: {e}")
+                            break
+                
+                print("Sleeping for 3 seconds...")
+                self.driver.refresh()
+                time.sleep(1)
 
         except Exception as e:
             print(f"An error occurred: {e}")
+            time.sleep(1)
 
     def _get_item_context(self, item_title):
         """Extract item name from the conversation heading."""
@@ -252,6 +298,9 @@ class FacebookSessionManager:
             else:
                 print("Item is not found")
                 return {"title": "Unknown Item", "price": "Unknown Price"}
+        except Exception as e:
+            print(f"Error getting item context from database: {e}")
+            return {"title": "Unknown Item", "price": "Unknown Price"}
 
     def _get_item_title(self):
         """Extract item name from the conversation heading."""
@@ -291,10 +340,10 @@ class FacebookSessionManager:
             return item_name.strip()
             
         except Exception as e:
-            print(f"Error getting item context: {e}")
+            print(f"Error getting item title: {e}")
             return "Unknown Item"
 
-    def _extract_conversation(self):
+    def _extract_conversation(self, queryRecentBuyer = False):
         """Extract conversation history with differentiation between buyer and seller messages"""
         try:
             # Get all message containers
@@ -303,32 +352,56 @@ class FacebookSessionManager:
             )))
             
             conversation_parts = []
+            isRecentMessageFromBuyer = False  # Default value
             
-            for container in message_containers:
+            # Skip patterns - text that should not be included in conversation
+            skip_patterns = [
+                " · ",  # Skip item titles in format "Name · Item"
+                "You can now rate",
+                "Rating your experience",
+                "Submit a rating",
+                "Today at",
+                "Enter",
+                "You sent"
+            ]
+            
+            for i, container in enumerate(message_containers):
                 try:
                     # Try to find the message text within the container
                     message_text = container.find_element(By.CSS_SELECTOR, "div[dir='auto']").text.strip()
                     if not message_text:
                         continue
+                        
+                    # Skip if message contains any of the skip patterns
+                    should_skip = any(pattern in message_text for pattern in skip_patterns)
+                    if should_skip:
+                        continue
                     
-                    # Check if this is a seller message by looking for specific classes and "You sent" text
+                    # Check if this is a seller message by looking for specific classes
                     try:
-                        # Look for the "You sent" text or x15zctf7 class which indicates seller message
+                        # Look for seller indicator class
                         container.find_element(By.CSS_SELECTOR, ".x15zctf7")
                         conversation_parts.append(f"seller(me): {message_text}")
+                        if (i == len(message_containers) - 1):
+                            isRecentMessageFromBuyer = False
                     except:
                         # If the seller indicators aren't found, it's a buyer message
                         conversation_parts.append(f"buyer(them): {message_text}")
+                        if (i == len(message_containers) - 1):
+                            isRecentMessageFromBuyer = True
                         
                 except Exception as e:
-                    print(f"Error processing message container: {e}")
+                    print(f"Error processing message container")
                     continue
-            
-            return "\n".join(conversation_parts)
+
+            if (queryRecentBuyer):
+                return isRecentMessageFromBuyer
+            else:
+                return "\n".join(conversation_parts) if conversation_parts else ""
             
         except Exception as e:
             print(f"Error extracting conversation: {e}")
-            return ""
+            return True if queryRecentBuyer else ""
 
     def quit(self):
         if self.driver:
