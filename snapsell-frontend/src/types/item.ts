@@ -6,7 +6,7 @@ export interface Item {
   description: string
   price: number
   condition: string
-  status: string
+  status: 'negotiating' | 'scheduled' | 'sold' | 'listed' | 'available' | string
   created_at?: string
   updated_at?: string
 }

@@ -119,7 +119,7 @@ export function ItemConfirmation({ items, onConfirm, editMode = false }: ItemCon
               <div className="md:col-span-1">
                 <div className="relative h-96 w-full">
                   <Image
-                    src={currentItem.image}
+                    src={currentItem.image_url}
                     alt={currentItem.title || currentItem.description}
                     fill
                     className="object-cover"

@@ -2,20 +2,9 @@
 import Image from 'next/image'
 import { Pencil } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { Item } from '../types/item'
 
-interface ItemStatusCardProps {
-  item: {
-    id: number
-    image: string
-    title: string
-    description: string
-    price: number
-    condition: string
-    status: 'negotiating' | 'scheduled' | 'sold' | 'listed' | 'available'
-  }
-}
-
-export function ItemStatusCard({ item }: ItemStatusCardProps) {
+export function ItemStatusCard({ item }: { item: Item }) {
   const router = useRouter()
   
   const statusColors = {
@@ -37,7 +26,7 @@ export function ItemStatusCard({ item }: ItemStatusCardProps) {
           <div className="flex-shrink-0">
             <Image 
               className="h-16 w-16 rounded-lg object-cover" 
-              src={item.image} 
+              src={item.image_url} 
               alt={item.title || item.description}
               width={64}
               height={64}
