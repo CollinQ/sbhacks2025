@@ -30,87 +30,63 @@ CORS(app, supports_credentials=True, resources={
 def post_to_facebook():
     try:
         data = request.get_json()
-        items = data.get('items', [])
-        print(f"[INFO] Received {len(items)} items")
+        item = data.get('item')  # Now expecting a single item
+        print(f"[INFO] Received item: {item}")
 
-        results = []
+        # Initialize Facebook session manager
         session_manager = FacebookSessionManager()
         session_manager.init_driver()
 
         try:
-            # Facebook login code
+            # Attempt to load existing session or perform new login
             if not session_manager.load_session():
                 email = os.getenv("FB_EMAIL")
                 password = os.getenv("FB_PASSWORD")
                 if not session_manager.login(email, password):
                     raise Exception("Facebook login failed")
 
-            for item in items:
-                try:
-                    # Image processing
-                    temp_dir = tempfile.gettempdir()
-                    image_url = item['image_url']
-                    image_ext = os.path.splitext(image_url.split('?')[0])[1] or '.jpg'
-                    temp_image_path = os.path.join(temp_dir, f"temp_image_{item['id']}{image_ext}")
+            # Download image from URL to temp file
+           
+            temp_dir = tempfile.gettempdir()
+            image_url = item['image_url']
+            image_ext = os.path.splitext(image_url.split('?')[0])[1] or '.jpg'
+            temp_image_path = os.path.join(temp_dir, f"temp_image{image_ext}")
 
-                    response = requests.get(image_url)
-                    with open(temp_image_path, 'wb') as f:
-                        f.write(response.content)
+            response = requests.get(image_url)
+            with open(temp_image_path, 'wb') as f:
+                f.write(response.content)
 
-                    success = session_manager.create_marketplace_listing(
-                        title=item['title'],
-                        price=int(item['price']),
-                        image_path=temp_image_path,
-                        category="Miscellaneous",
-                        condition=item['condition'],
-                        description=item['description']
-                    )
+            # Create listing for the item using local image path
+            success = session_manager.create_marketplace_listing(
+                title=item['title'],
+                price=int(item['price']),
+                image_path=temp_image_path,
+                category="Miscellaneous",
+                condition=item['condition'],
+                description=item['description']
+            )
 
-                    os.remove(temp_image_path)
+            # Clean up temp file
+            os.remove(temp_image_path)
 
-                    if success:
-                        try:
-                            # Update database status immediately after successful posting
-                            supabase.table('items')\
-                                    .update({'status': 'listed'})\
-                                    .eq('id', item['id'])\
-                                    .execute()
-                            print(f"[INFO] Updated status to 'listed' for item: {item['id']}")
-                        except Exception as db_error:
-                            print(f"[ERROR] Failed to update status for item {item['id']}: {str(db_error)}")
-                            success = False  # Mark as failed if database update fails
+            if not success:
+                raise Exception("Failed to create Facebook listing")
 
-                    results.append({
-                        "item_id": item['id'],
-                        "title": item['title'],
-                        "success": success,
-                        "message": "Posted successfully" if success else "Failed to create listing"
-                    })
-
-                except Exception as item_error:
-                    results.append({
-                        "item_id": item['id'],
-                        "title": item['title'],
-                        "success": False,
-                        "message": str(item_error)
-                    })
-                print(f"[INFO] Completed posting item: '{item['title']}' (ID: {item['id']})")
+            # Update item status in Supabase to "listed"
+            supabase.table('items').update({"status": "listed"}).eq('id', item['id']).execute()
 
             return jsonify({
-                "status": "success",
-                "results": results,
-                "message": f"Processed {len(items)} items"
+                "status": "success", 
+                "message": f"Item '{item['title']}' posted to Facebook"
             }), 200
 
         finally:
             session_manager.quit()
 
     except Exception as e:
-        return jsonify({
-            "status": "error", 
-            "message": str(e)
-        }), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
 
+        
 @app.route('/api/process_video', methods=['POST'])
 def process_video():
     try:

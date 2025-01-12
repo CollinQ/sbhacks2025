@@ -40,7 +40,7 @@ class FacebookSessionManager:
         """Initialize Chrome driver with optimized settings for Facebook Marketplace."""
         # Set up Chrome options
         chrome_options = Options()
-        # chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=1920,1080")
         chrome_options.add_argument("--no-sandbox")
@@ -241,7 +241,7 @@ class FacebookSessionManager:
                 By.XPATH, '//span[text()="Category"]/following::input[1]'
             )))
             self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", category_input)
-            time.sleep(1)# Clear and type the category
+            time.sleep(2)# Clear and type the category
             category_input.clear()
             category_input.send_keys(category)
             
@@ -283,7 +283,7 @@ class FacebookSessionManager:
                 By.XPATH, './following::div[contains(@class, "xjyslct")][1]'
             )
             condition_input.click()
-            time.sleep(1)
+            time.sleep(2)
             
             condition_option = self.wait.until(EC.presence_of_element_located((
                 By.XPATH, f'//div[@role="option"]//span[text()="{condition}"]'
