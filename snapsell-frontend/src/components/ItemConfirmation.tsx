@@ -90,7 +90,7 @@ export function ItemConfirmation({ items, onConfirm, editMode = false }: ItemCon
         if (currentIndex < items.length - 1) {
           handleNext()
         } else {
-          router.push('/inventory')
+          router.push('/')
         }
       } else {
         const { data, error } = await supabase
@@ -107,7 +107,7 @@ export function ItemConfirmation({ items, onConfirm, editMode = false }: ItemCon
         if (currentIndex < items.length - 1) {
           handleNext()
         } else { 
-          router.push('/inventory')
+          router.push('/')
         }
       }
     } catch (error) {
