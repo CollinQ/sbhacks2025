@@ -29,7 +29,10 @@ def process_video():
             
         try:
             # Process the video using Gemini
-            result = gemini.main(path_to_video_file=video_url)
+            path_to_video_file = os.environ.get("PATH_TO_VIDEO_FILE") + video_url
+            print(f"[INFO] Path to video file: {path_to_video_file}")
+
+            result = gemini.main(path_to_video_file=path_to_video_file)
             print("[DEBUG] Gemini result:", result)
             
             return jsonify({

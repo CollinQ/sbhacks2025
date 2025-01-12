@@ -387,5 +387,9 @@ def main(path_to_video_file):
     return item_ids
 
 if __name__ == "__main__":
-    path_to_video_file = input("Please enter the path to your video file: ")
+    print("[INFO] Starting script...")
+    video_file = input("Please enter the path to your video file: ")
+    path_to_video_file = process.env.NEXT_PUBLIC_API_BASE_URL + video_file
+    print(f"[INFO] Path to video file: {path_to_video_file}")
+    
     main(path_to_video_file=path_to_video_file)
