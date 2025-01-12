@@ -18,7 +18,7 @@ export default function EditItem() {
       if (item) {
         setEditItem(item)
       } else {
-        router.push('/inventory')
+        router.push('/')
       }
     }
   }, [items, params.id, router])  
@@ -28,7 +28,7 @@ export default function EditItem() {
       <div className="text-center py-8">
         <h2 className="text-2xl font-semibold mb-4">Item not found</h2>
         <button 
-          onClick={() => router.push('/inventory')} 
+          onClick={() => router.push('/')} 
           className="text-blue-600 hover:text-blue-800"
         >
           Return to Inventory
@@ -43,7 +43,7 @@ export default function EditItem() {
       <ItemConfirmation 
         items={[editItem]} 
         editMode={true} 
-        onConfirm={() => router.push('/inventory')}
+        onConfirm={() => router.push('/')}
       />
     </div>
   )
