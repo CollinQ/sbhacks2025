@@ -38,18 +38,16 @@ def post_to_facebook():
         session_manager.init_driver()
 
         try:
-            # Facebook login code remains the same...
+            # Facebook login code
             if not session_manager.load_session():
                 email = os.getenv("FB_EMAIL")
                 password = os.getenv("FB_PASSWORD")
                 if not session_manager.login(email, password):
                     raise Exception("Facebook login failed")
 
-            # Process each item
-            successful_item_ids = []  # Track successfully posted items
             for item in items:
                 try:
-                    # Image processing and Facebook posting code remains the same...
+                    # Image processing
                     temp_dir = tempfile.gettempdir()
                     image_url = item['image_url']
                     image_ext = os.path.splitext(image_url.split('?')[0])[1] or '.jpg'
@@ -71,7 +69,16 @@ def post_to_facebook():
                     os.remove(temp_image_path)
 
                     if success:
-                        successful_item_ids.append(item['id'])
+                        try:
+                            # Update database status immediately after successful posting
+                            supabase.table('items')\
+                                    .update({'status': 'listed'})\
+                                    .eq('id', item['id'])\
+                                    .execute()
+                            print(f"[INFO] Updated status to 'listed' for item: {item['id']}")
+                        except Exception as db_error:
+                            print(f"[ERROR] Failed to update status for item {item['id']}: {str(db_error)}")
+                            success = False  # Mark as failed if database update fails
 
                     results.append({
                         "item_id": item['id'],
@@ -88,19 +95,6 @@ def post_to_facebook():
                         "message": str(item_error)
                     })
                 print(f"[INFO] Completed posting item: '{item['title']}' (ID: {item['id']})")
-
-            # Update status for all successful items in one batch
-            if successful_item_ids:
-                try:
-                    # Update all successful items to 'listed' status
-                    supabase.table('items')\
-                            .update({'status': 'listed'})\
-                            .in_('id', successful_item_ids)\
-                            .execute()
-                    print(f"[INFO] Updated status to 'listed' for items: {successful_item_ids}")
-                except Exception as db_error:
-                    print(f"[ERROR] Failed to update item statuses: {str(db_error)}")
-            
 
             return jsonify({
                 "status": "success",
