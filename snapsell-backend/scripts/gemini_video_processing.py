@@ -386,9 +386,6 @@ def main(path_to_video_file):
     print(f"[INFO] Item IDs: {item_ids}")
     return item_ids
 
-    except Exception as e:
-        print(f"[ERROR] An error occurred: {e}")
-
 if __name__ == "__main__":
     path_to_video_file = input("Please enter the path to your video file: ")
     main(path_to_video_file=path_to_video_file)
