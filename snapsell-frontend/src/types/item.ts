@@ -11,5 +11,5 @@ export interface Item {
   updated_at?: string
 }
 
-export type ItemStatus = 'active' | 'sold'  | 'scheduled' | 'unlisted'
+export type ItemStatus = 'scheduled' | 'sold' | 'negotiating' | 'listed' | 'unlisted'
 
