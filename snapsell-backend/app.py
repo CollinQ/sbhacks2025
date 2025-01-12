@@ -7,6 +7,7 @@ import os
 from postautomation.automate import FacebookSessionManager
 import requests
 import tempfile
+import time
 # Load environment variables
 load_dotenv()
 
@@ -56,22 +57,24 @@ def post_to_facebook():
             with open(temp_image_path, 'wb') as f:
                 f.write(response.content)
 
-            # Create listing for the item using local image path
-            success = session_manager.create_marketplace_listing(
-                title=item['title'],
+
+            success = False
+
+            while not success:
+                # Create listing for the item using local image path
+                success = session_manager.create_marketplace_listing(
+                    title=item['title'],
                 price=int(item['price']),
                 image_path=temp_image_path,
                 category="Miscellaneous",
                 condition=item['condition'],
-                description=item['description']
-            )
+                description=item['description'])
+                if not success:
+                    print("[DEBUG] Failed to create Facebook listing, retrying...")
+                    time.sleep(1)
 
             # Clean up temp file
             os.remove(temp_image_path)
-
-            if not success:
-                raise Exception("Failed to create Facebook listing")
-
             # Update item status in Supabase to "listed"
             supabase.table('items').update({"status": "listed"}).eq('id', item['id']).execute()
 
