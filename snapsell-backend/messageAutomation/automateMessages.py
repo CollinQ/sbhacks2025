@@ -135,48 +135,62 @@ class FacebookSessionManager:
             print(f"Login failed: {e}")
             return False
 
-    def automate_messages(self, js_path):
+    def automate_messages(self):
         try:
             print("reached automation endpoint")
-            # navigate to messenger marketplace tab
-            messenger_button = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "div[aria-label='Messenger'][role='button']")))
-            messenger_button.click()
-            see_all_in_messenger_link = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@aria-label='See all in Messenger']")))
-            see_all_in_messenger_link.click()
-            marketplace_chats = self.wait.until(EC.presence_of_element_located((By.XPATH, '//span[text()="Marketplace"]')))
+            # Navigate directly to Facebook Messages
+            self.driver.get("https://www.facebook.com/messages/t/")
+            time.sleep(2)  # Wait for page to load
+            
+            # Click on Marketplace tab
+            marketplace_chats = self.wait.until(EC.presence_of_element_located((
+                By.XPATH, '//span[text()="Marketplace"]'
+            )))
             marketplace_chats.click()
 
-            while True:
+            # Find unvisited chats
+            unvisited_chats = self.wait.until(EC.presence_of_all_elements_located((
+                By.CSS_SELECTOR, 'span.xeuugli.xveuv9e'
+            )))
+
+            # print("visited chats")
+
+            # visited_chats = self.wait.until(EC.presence_of_all_elements_located((
+            #     By.CSS_SELECTOR, 'a[aria-current="false"] span.xeuugli.x1j3b5cy.x1nvkwcz'
+            # )))
+
+            # print(f"visited chats: {visited_chats}")
+
+            print(f"Found {len(unvisited_chats)} unvisited chats")
+
+            for chat in unvisited_chats:
                 try:
-                    # Find and click unread message
-                    button_div = self.wait.until(EC.presence_of_element_located((
-                        By.CSS_SELECTOR, "div.x9f619.x1n2onr6.x1ja2u2z.xdt5ytf.x2lah0s.x193iq5w.xeuugli.x78zum5"
-                    )))
-                    print("Found unread message button")
-                    button_div.click()
+                    # Scroll the chat into view and click it
+                    self.driver.execute_script("arguments[0].scrollIntoView(true);", chat)
+                    time.sleep(1)  # Give time for smooth scrolling
+                    chat.click()
                     
                     # Wait for conversation to load
                     time.sleep(2)
                     
-                    # Get conversation history
-                    messages = self.wait.until(EC.presence_of_all_elements_located((
-                        By.CSS_SELECTOR, "div[role='row']"
-                    )))
-                    conversation_history = "\n".join([msg.text for msg in messages])
+                    # Extract conversation
+                    conversation_history = self._extract_conversation()
+                    print("Extracted conversation:")
+                    print(conversation_history)
                     
-                    # Get item context
-                    item_context = self._get_item_context()
+                    # # Get item context
+                    # item_context = self._get_item_context()
                     
-                    # Detect conversation stage and generate response
-                    stage = ai_agent.detect_stage(conversation_history, item_context)
-                    response = ai_agent.generate_response(conversation_history, item_context, stage)
+                    # # Detect conversation stage and generate response
+                    # stage = ai_agent.detect_stage(conversation_history, item_context)
+                    # response = ai_agent.generate_response(conversation_history, item_context, stage)
                     
-                    # Send response
-                    message_input = self.wait.until(EC.presence_of_element_located((
-                        By.CSS_SELECTOR, "div[role='textbox']"
-                    )))
-                    message_input.send_keys(response)
-                    message_input.send_keys(Keys.RETURN)
+                    # # Send response
+                    # message_input = self.wait.until(EC.presence_of_element_located((
+                    #     By.CSS_SELECTOR, "div[role='textbox']"
+                    # )))
+                    # message_input.send_keys(response)
+                    # message_input.send_keys(Keys.RETURN)
                     
                     time.sleep(2)  # Wait for message to send
                     
@@ -209,6 +223,52 @@ class FacebookSessionManager:
             print(f"Error getting item context: {e}")
             return {"title": "Unknown Item", "price": "Unknown Price"}
 
+    def _extract_conversation(self):
+        """Extract conversation history with differentiation between buyer and seller messages"""
+        try:
+            # Get all message containers
+            message_containers = self.wait.until(EC.presence_of_all_elements_located((
+                By.CSS_SELECTOR, "div[role='row']"
+            )))
+            
+            conversation_parts = []
+            buyer_name = None
+            
+            for container in message_containers:
+                try:
+                    # Try to find the message text within the container
+                    message_text = container.find_element(By.CSS_SELECTOR, "div[dir='auto']").text.strip()
+                    if not message_text:
+                        continue
+                        
+                    # Try to find the sender's name (usually in a span element)
+                    try:
+                        name_element = container.find_element(By.CSS_SELECTOR, "span.x1lliihq span.x1lliihq")
+                        sender_name = name_element.text.strip().split(' ·')[0]  # Remove the timestamp
+                        if not buyer_name and sender_name != "You":
+                            buyer_name = sender_name
+                    except:
+                        sender_name = "Unknown"
+                    
+                    # Check if this is an outgoing message (from me)
+                    try:
+                        # Outgoing messages have a different CSS structure
+                        container.find_element(By.CSS_SELECTOR, "div.x1n2onr6.xw2csxc")
+                        conversation_parts.append(f"me: {message_text}")
+                    except:
+                        # If not found, it's an incoming message
+                        conversation_parts.append(f"buyer({buyer_name or 'them'}): {message_text}")
+                        
+                except Exception as e:
+                    print(f"Error processing message container: {e}")
+                    continue
+            
+            return "\n".join(conversation_parts)
+            
+        except Exception as e:
+            print(f"Error extracting conversation: {e}")
+            return ""
+
     def quit(self):
         if self.driver:
             self.driver.quit()
@@ -227,7 +287,7 @@ def main():
             if not session_manager.login(email, password):
                 raise Exception("Login failed")
         JS_PATH = "//path/to/button"
-        session_manager.automate_messages(JS_PATH)
+        session_manager.automate_messages()
         
         time.sleep(200)  # Wait for user interaction
 
