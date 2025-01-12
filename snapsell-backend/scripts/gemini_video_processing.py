@@ -269,7 +269,7 @@ def upload_items_to_supabase(df: pd.DataFrame, user_id: str) -> List[str]:
             "user_id": user_id,
             "title": row['title'],
             "description": row['description'],
-            "price": float(row['price']),  # Convert to numeric
+            "price": int(row['price']),  # Convert to numeric
             "condition": row['condition'],
             "status": "unlisted",  # Default status
             "image_url": row['image_url'],  # Can be updated later

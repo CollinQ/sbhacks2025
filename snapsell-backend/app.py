@@ -130,6 +130,12 @@ def process_video():
             result = gemini.main(path_to_video_file=path_to_video_file)
             print("[DEBUG] Gemini result:", result)
             
+            # Convert any float prices to integers before returning
+            if isinstance(result, list):
+                for item in result:
+                    if 'price' in item:
+                        item['price'] = int(float(item['price']))
+            
             return jsonify({
                 "status": "success",
                 "message": "Video processing completed",
